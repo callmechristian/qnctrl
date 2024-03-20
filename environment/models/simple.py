@@ -28,7 +28,8 @@ class SimpleEnv:
 
         This variable represents the starting time for the simulation.
         """
-        self.max_t = max_t + self.t
+        self.max_t = max_t # ! will be updated when simulate is called
+        self.initial_max_t = max_t
         """
         The maximum simulation time horizon.
 
@@ -44,8 +45,11 @@ class SimpleEnv:
         self.QBER_history = []
         self.phi_history = []
     
-    def simulate(self):
-        for t in np.arange(0., self.max_t, self.delta_t):
+    def simulate(self, reset=True):
+        if reset:
+            self.reset()
+        
+        for t in np.arange(self.t, self.max_t + self.t, self.delta_t):
             # move the angles based on the motion model
             phi_move = []
             for i in range(12):
@@ -64,6 +68,10 @@ class SimpleEnv:
             self.phi_history.append(phi_move)
             # compute the QBERs
             self.QBER_history.append(QBERs(entangledStatePropag))
+        
+        # update times
+        self.t = self.t + self.max_t
+        self.max_t = self.max_t + self.initial_max_t
     
     def get_QBER(self):
             """
@@ -82,3 +90,8 @@ class SimpleEnv:
                 numpy.ndarray: The phi history.
             """
             return np.array(self.phi_history)
+        
+    def reset(self):
+        self.t = 0.
+        self.QBER_history = []
+        self.phi_history = []
