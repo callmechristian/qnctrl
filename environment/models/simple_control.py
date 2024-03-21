@@ -73,11 +73,11 @@ class SimpleControlledEnv:
         self.QBER_history = []
         self.phi_history = []
 
-    def step(self, a: np.array = np.zeros(12)):
+    def step(self, a_pump: np.array = np.zeros(4), a_alice: np.array = np.zeros(4), a_bob: np.array = np.zeros(4)):
         # set self control gates to action
-        self.ctrl_pump = a[0:4]
-        self.ctrl_alice = a[4:8]
-        self.ctrl_bob = a[8:12]
+        self.ctrl_pump = a_pump
+        self.ctrl_alice = a_alice
+        self.ctrl_bob = a_bob
                 
         # *: assume our MDP state is the size of the latency in control
         for ctrl_latency_counter in range(self.latency + 1):
