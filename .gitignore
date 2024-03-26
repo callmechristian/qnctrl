@@ -6,6 +6,9 @@ venv/
 dist/
 build/
 *.egg
+environment/__pycache__/
+environment/core/__pycache__/
+environment/models/__pycache__/
 
 # Jupyter Notebooks
 .ipynb_checkpoints/
