@@ -44,6 +44,7 @@ class SimpleEnv:
         
         self.QBER_history = []
         self.phi_history = []
+        self.t_history = []
     
     def simulate(self, reset=True):
         if reset:
@@ -68,6 +69,8 @@ class SimpleEnv:
             self.phi_history.append(phi_move)
             # compute the QBERs
             self.QBER_history.append(QBERs(entangledStatePropag))
+            # append time for plotting
+            self.t_history.append(t)
         
         # update times
         self.t = self.t + self.max_t
@@ -93,5 +96,6 @@ class SimpleEnv:
         
     def reset(self):
         self.t = 0.
+        self.t_history = []
         self.QBER_history = []
         self.phi_history = []
