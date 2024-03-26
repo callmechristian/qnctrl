@@ -1,0 +1,20 @@
+# Python
+*.pyc
+__pycache__/
+venv/
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+*.ipynb_checkpoints/
+*.nbconvert.ipynb
+*.nbconvert.html
+*.nbconvert.pdf
+*.nbconvert.py
+*.nbconvert.md
+*.nbconvert.tex
+*.nbconvert.txt
+*.nbconvert.xml
