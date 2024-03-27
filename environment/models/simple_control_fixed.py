@@ -4,8 +4,8 @@ from ..random_motion import ladybug
 import numpy as np
 
 
-class SimpleControlledEnv:    
-    def __init__(self, t0: float = 0, max_t: float = 0.2, latency: int = 3):
+class SimpleControlledFixedEnv:    
+    def __init__(self, t0: float = 0, max_t: float = 0.2, latency: int = 3, fixed_error: np.array = np.zeros(12)):
         """
         Initializes an instance of SimpleEnv.
 
@@ -67,11 +67,53 @@ class SimpleControlledEnv:
         This variable represents the number of steps the control is delayed. It also represents the number of steps 
         included in the MDP state.
         """
+        self.fixed_error_ctrl_pump = fixed_error[0:4]
+        """
+        The simulated error (array) for the pump.
+
+        This variable represents the simulated error for the pump. It is used to simulate the error for the pump entanglement propagation.
+        """
+        self.fixed_error_ctrl_alice = fixed_error[4:8]
+        """
+        The simulated error (array) for Alice.
+
+        This variable represents the simulated error for Alice. It is used to simulate the error for Alice's entanglement propagation.
+        """
+        self.fixed_error_ctrl_bob = fixed_error[8:12]
+        """
+        The simulated error (array) for Bob.
+
+        This variable represents the simulated error for Bob. It is used to simulate the error for Bob's entanglement propagation.
+        """
+        self.fixed_errors_flags = np.repeat(False, 12)
+        """
+        The fixed error flags.
+        
+        This variable represents the flags for whcih errors will be fixed.
+        """
+        self.ctrl_alice_current = np.zeros(4)
+        self.ctrl_bob_current = np.zeros(4)
+        self.ctrl_pump_current = np.zeros(4)
         
         self.done = False
+        """
+        The done flag.
+        
+        This variable represents the flag that indicates the end of the simulation.
+        """
         
         self.QBER_history = []
+        """
+        The QBER history.
+        
+        This variable represents the history of the QBER values.
+        """
         self.phi_history = []
+        """
+        The phi history.
+        
+        This variable represents the history of the phi values.
+        """
 
     def step(self, a_pump: np.array = np.zeros(4), a_alice: np.array = np.zeros(4), a_bob: np.array = np.zeros(4)):
         # set self control gates to action
@@ -84,13 +126,20 @@ class SimpleControlledEnv:
             # update current time step
             self.t += self.delta_t
 
-            # compute the move the angles based on the motion model
+            # compute the move the angles based on the motion model or fixed
             phi_move = []
+            # concatenate the fixed errors
+            _errs = np.concatenate((self.fixed_error_ctrl_alice, self.fixed_error_ctrl_bob, self.fixed_error_ctrl_pump))
             for i in range(12):
-                phi_move.append(self.phi[i].move(self.t))
+                # if the error is fixed, we append the fixed error
+                if self.fixed_errors_flags[i]:
+                    phi_move.append(_errs[i])
+                else:
+                    # otherwise we append the random error
+                    phi_move.append(self.phi[i].move(self.t))
 
             # rotation of the pump in the source -- + 
-           # *: here is where we do the control with @gate
+            # *: here is where we do the control with @gate
             pumpPolarisation = ctrlPolar(phi_move[0:4]) @ self.H
             pumpPolarisation = ctrlPolar(self.ctrl_pump_current) @ pumpPolarisation
             

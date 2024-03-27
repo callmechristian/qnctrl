@@ -1,10 +1,9 @@
 from ..core import ctrlPolar, entangler, QBERs
-from ..random_motion import ladybug
 
 import numpy as np
 
 
-class SimpleEnv:
+class PerfectEnv:
     def __init__(self, t0: float = 0, max_t: float = 0.2):
         """
         Initializes an instance of SimpleEnv.
@@ -20,7 +19,7 @@ class SimpleEnv:
 
         self.phi = []
         for i in range (12):
-            self.phi.append(ladybug())
+            self.phi.append(0)
 
         self.t = t0 + 0.
         """
@@ -51,10 +50,8 @@ class SimpleEnv:
             self.reset()
         
         for t in np.arange(self.t, self.max_t + self.t, self.delta_t):
-            # move the angles based on the motion model
-            phi_move = []
-            for i in range(12):
-                phi_move.append(self.phi[i].move(t))
+            # dont move the angles
+            phi_move = np.zeros(12)
                 
             # rotation of the pump in the source -- + 
             # TODO: here is where we do the control with @gate
@@ -67,6 +64,26 @@ class SimpleEnv:
             # TODO: here is where we do the control with np.kron
             # append the angles for plotting
             self.phi_history.append(phi_move)
+            # compute the QBERs
+            self.QBER_history.append(QBERs(entangledStatePropag))
+            # append time for plotting
+            self.t_history.append(t)
+        
+        # update times
+        self.t = self.t + self.max_t
+        self.max_t = self.max_t + self.initial_max_t
+    
+    def simulate_no_polar(self, reset=True):
+        if reset:
+            self.reset()
+        print("what")
+        for t in np.arange(self.t, self.max_t + self.t, self.delta_t):                
+            # rotation of the pump in the source -- + 
+            pumpPolarisation = self.H
+            # generation of the entangled state
+            entangledState = entangler(pumpPolarisation)
+            # rotation of the entangled state during the propagation -- gives entangled state at next time point
+            entangledStatePropag = entangledState
             # compute the QBERs
             self.QBER_history.append(QBERs(entangledStatePropag))
             # append time for plotting
