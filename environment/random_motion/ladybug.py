@@ -1,7 +1,7 @@
 from random import gauss, seed
 from numpy import sin, cos
 
-class ladybug:
+class LadyBug:
     """
     Represents a ladybug random motion model object.
 
@@ -23,7 +23,7 @@ class ladybug:
         if s > 0:
             seed(s)
         self.params_x = [gauss(0., 1.) for u in range(8)]
-    
+
     def move(self, t: float):
         """
         Calculates the ladybug model's movement at time t.
@@ -35,7 +35,8 @@ class ladybug:
             float: The calculated movement of the ladybug model at time t.
         """
         [ax1, ax2, ax3, ax4, kx1, kx2, kx3, kx4] = self.params_x
-        
-        x = ax1 * sin(t * (kx1 + 20)) + ax2 * cos(t * (kx2 + 10)) + ax3 * sin(t * (kx3 + 5)) + ax4 * cos(t * (kx4 + 5))
-    
+
+        x = ax1 * sin(t * (kx1 + 20)) + ax2 * cos(t * (kx2 + 10)) \
+        + ax3 * sin(t * (kx3 + 5)) + ax4 * cos(t * (kx4 + 5))
+
         return x
