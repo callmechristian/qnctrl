@@ -1,5 +1,5 @@
 from ..core import ctrlPolar, entangler, noisyStat
-from ..random_motion import ladybug
+from ..random_motion import LadyBug
 
 import numpy as np
 
@@ -21,7 +21,7 @@ class SimpleControlledEnv:
 
         self.phi = []
         for i in range (12):
-            self.phi.append(ladybug())
+            self.phi.append(LadyBug())
 
         self.t = t0 + 0.
         """

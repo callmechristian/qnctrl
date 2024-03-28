@@ -1,7 +1,7 @@
 import numpy as np
 
 from ..core import ctrlPolar, entangler, QBERs
-from ..random_motion import ladybug
+from ..random_motion import LadyBug
 
 class SimpleControlledFixedEnv:
     """
@@ -51,7 +51,7 @@ class SimpleControlledFixedEnv:
 
         self.phi = []
         for _ in range (12):
-            self.phi.append(ladybug())
+            self.phi.append(LadyBug())
 
         self.t = t0 + 0.
         """
