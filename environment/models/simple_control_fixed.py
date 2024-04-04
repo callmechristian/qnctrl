@@ -177,7 +177,7 @@ class SimpleControlledFixedEnv:
             # compute the move the angles based on the motion model or fixed
             phi_move = []
             # concatenate the fixed errors
-            _errs = np.concatenate((self.fixed_error_ctrl_pump, self.fixed_error_ctrl_alice, 
+            _errs = np.concatenate((self.fixed_error_ctrl_pump, self.fixed_error_ctrl_alice,
                                     self.fixed_error_ctrl_bob))
             for i in range(12):
                 # if the error is fixed, we append the fixed error
@@ -190,7 +190,7 @@ class SimpleControlledFixedEnv:
             # rotation of the pump in the source -- +
             # *: here is where we do the control with @gate
             pump_polarisation = ctrlPolar(phi_move[0:4]) @ self.H
-            pump_polarisation = ctrlPolar(self.ctrl_pump_current) @ pump_polarisation
+            pump_polarisation = np.linalg.inv(ctrlPolar(self.ctrl_pump_current)) @ pump_polarisation
 
             # generation of the entangled state
             entangled_state = entangler(pump_polarisation)
@@ -200,8 +200,8 @@ class SimpleControlledFixedEnv:
                                         ctrlPolar(phi_move[8:12])) @ entangled_state
 
             # *: here is where we do the control with np.kron
-            entangled_state_propag = np.kron(ctrlPolar(self.ctrl_alice_current),
-                                           ctrlPolar(self.ctrl_bob_current))@entangled_state_propag
+            entangled_state_propag = np.kron(np.linalg.inv(ctrlPolar(self.ctrl_alice_current)),
+                                           np.linalg.inv(ctrlPolar(self.ctrl_bob_current)))@entangled_state_propag
 
             # *: update control actual values to the current control values
             if ctrl_latency_counter == self.latency:
