@@ -319,7 +319,7 @@ class SimpleControlledFixedEnv:
         Returns:
             float: The reward value.
         """
-        qber = self.qber_history[-1]  # assuming this is where you store your QBERs
+        qber = self.qber_history[-1]
         reward = -1 * (qber[0] + qber[1])
         return reward
 
