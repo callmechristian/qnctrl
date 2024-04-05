@@ -1,4 +1,4 @@
-from ..core import ctrlPolar, entangler, QBERs
+from ..core import polar_control, entangler, compute_qber
 from ..random_motion import LadyBug
 
 import numpy as np
@@ -91,17 +91,17 @@ class SimpleControlledEnv:
 
             # rotation of the pump in the source -- + 
            # *: here is where we do the control with @gate
-            pumpPolarisation = ctrlPolar(phi_move[0:4]) @ self.H
-            pumpPolarisation = ctrlPolar(self.ctrl_pump_current) @ pumpPolarisation
+            pumpPolarisation = polar_control(phi_move[0:4]) @ self.H
+            pumpPolarisation = polar_control(self.ctrl_pump_current) @ pumpPolarisation
             
             # generation of the entangled state
             entangledState = entangler(pumpPolarisation)
             # rotation of the entangled state during the propagation -- gives entangled state at next time step
-            entangledStatePropag = np.kron(ctrlPolar(phi_move[4:8]),
-                                        ctrlPolar(phi_move[8:12])) @ entangledState
+            entangledStatePropag = np.kron(polar_control(phi_move[4:8]),
+                                        polar_control(phi_move[8:12])) @ entangledState
             
             # *: here is where we do the control with np.kron
-            entangledStatePropag = np.kron(ctrlPolar(self.ctrl_alice_current), ctrlPolar(self.ctrl_bob_current)) @ entangledStatePropag
+            entangledStatePropag = np.kron(polar_control(self.ctrl_alice_current), polar_control(self.ctrl_bob_current)) @ entangledStatePropag
             # *: update control actual values to the current control values
             if ctrl_latency_counter == self.latency:
                 self.ctrl_alice_current = self.ctrl_alice
@@ -111,7 +111,7 @@ class SimpleControlledEnv:
             # append the angles for plotting
             self.phi_history.append(phi_move)
             # compute the QBERs
-            QBERs_current = QBERs(entangledStatePropag)
+            QBERs_current = compute_qber(entangledStatePropag)
             self.QBER_history.append(QBERs_current)
             
             # if we exceed max t

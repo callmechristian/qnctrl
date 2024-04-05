@@ -1,4 +1,4 @@
-from ..core import ctrlPolar, entangler, QBERs
+from ..core import polar_control, entangler, compute_qber
 
 import numpy as np
 
@@ -55,17 +55,17 @@ class PerfectEnv:
                 
             # rotation of the pump in the source -- + 
             # TODO: here is where we do the control with @gate
-            pumpPolarisation = ctrlPolar(phi_move[0:4])@self.H
+            pumpPolarisation = polar_control(phi_move[0:4])@self.H
             # generation of the entangled state
             entangledState = entangler(pumpPolarisation)
             # rotation of the entangled state during the propagation -- gives entangled state at next time point
-            entangledStatePropag = np.kron(ctrlPolar(phi_move[4:8]),
-                                        ctrlPolar(phi_move[8:12]))@entangledState
+            entangledStatePropag = np.kron(polar_control(phi_move[4:8]),
+                                        polar_control(phi_move[8:12]))@entangledState
             # TODO: here is where we do the control with np.kron
             # append the angles for plotting
             self.phi_history.append(phi_move)
             # compute the QBERs
-            self.QBER_history.append(QBERs(entangledStatePropag))
+            self.QBER_history.append(compute_qber(entangledStatePropag))
             # append time for plotting
             self.t_history.append(t)
         
@@ -85,7 +85,7 @@ class PerfectEnv:
             # rotation of the entangled state during the propagation -- gives entangled state at next time point
             entangledStatePropag = entangledState
             # compute the QBERs
-            self.QBER_history.append(QBERs(entangledStatePropag))
+            self.QBER_history.append(compute_qber(entangledStatePropag))
             # append time for plotting
             self.t_history.append(t)
         

@@ -2,6 +2,7 @@
 This is the __init__.py file for the 'environment.core' package.
 """
 
-from .polarisation_controller import ctrlPolar
-from .entangler import entangler
-from .measurement import ProbDet, QBERs, noisyStat
+# noqa is used to ignore the flake8 error F401 (imported but unused)
+from .polarisation_controller import polar_control # noqa
+from .entangler import entangler # noqa
+from .measurement import prob_det, compute_qber, compute_noisy_qber # noqa
