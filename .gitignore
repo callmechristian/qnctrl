@@ -10,6 +10,9 @@ environment/__pycache__/
 environment/core/__pycache__/
 environment/models/__pycache__/
 
+# Custom
+temp
+
 # Jupyter Notebooks
 .ipynb_checkpoints/
 *.ipynb_checkpoints/
