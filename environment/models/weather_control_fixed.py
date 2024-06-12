@@ -25,7 +25,7 @@ This module imports the following packages:
 from typing import List
 import numpy as np
 
-from ..core import polar_control, entangler, compute_qber
+from ..core import polar_control, entangler, compute_qber, FibreLink, polarisation_from_force
 from ..weather.historical_weather import WeatherModel
 
 class WeatherControlledFixedEnv:
@@ -206,6 +206,9 @@ class WeatherControlledFixedEnv:
         self.ctrl_alice = a_alice
         self.ctrl_bob = a_bob
 
+        # create a fibrelink segment
+        link = FibreLink()
+
         # *: assume our MDP state is the size of the latency in control
         for ctrl_latency_counter in range(self.latency + 1):
             # update current time step
@@ -232,7 +235,7 @@ class WeatherControlledFixedEnv:
 
             # rotation of the pump in the source -- +
             # *: here is where we do the control with @gate
-            pump_polarisation = polar_control(phi_move[0:4]) @ self.H
+            pump_polarisation = polarisation_from_force(10, link) @ self.H
             pump_polarisation = (
                 np.linalg.inv(polar_control(self.ctrl_pump_current)) @ pump_polarisation
             )
