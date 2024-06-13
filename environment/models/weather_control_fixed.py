@@ -26,7 +26,8 @@ from typing import List
 import numpy as np
 
 from ..core import polar_control, entangler, compute_qber, FibreLink, polarisation_from_force
-from ..weather.historical_weather import WeatherModel
+from ..weather.wind_model import WindModel
+from ...data.utils.data_processing import load_historical_weather_data
 
 class WeatherControlledFixedEnv:
     """
@@ -66,6 +67,7 @@ class WeatherControlledFixedEnv:
         step_time: float = 60,
         latency: int = 3,
         fixed_error: np.array = np.zeros(12),
+        fibre_segments: int = 1,
     ):
         """
         Initializes an instance of SimpleEnv.
@@ -79,22 +81,26 @@ class WeatherControlledFixedEnv:
         """
         # the polarization vector of the pump
         self.H = 1 / np.sqrt(2) * np.matrix([[1], [1]]) # pylint: disable=invalid-name
+        
+        self.data = load_historical_weather_data()
 
-        self.phi = []
-        for _ in range(12):
-            self.phi.append(WeatherModel())
-
+        self.phi = [WindModel(self.data) for _ in range(fibre_segments)]
+        
         self.t = t0 + 0.0
         """
         The initial time value.
 
         This variable represents the starting time for the simulation.
         """
-        self.max_t = max_steps + self.t
+        self.max_t = max_steps * step_time
         """
         The maximum simulation time horizon.
 
         This variable represents the maximum simulation time.
+        """
+        self.max_steps = max_steps
+        """
+        The maximum number of steps.
         """
         self.step_time = step_time
         """
@@ -135,28 +141,9 @@ class WeatherControlledFixedEnv:
         This variable represents the number of steps the control is delayed. It also represents 
         the number of steps included in the MDP state.
         """
-        self.fixed_error_ctrl_pump = fixed_error[0:4] # type: ignore
-        """
-        The simulated error (array) for the pump.
-
-        This variable represents the simulated error for the pump. It is used to simulate the error 
-        for the pump entanglement propagation.
-        """
-        self.fixed_error_ctrl_alice = fixed_error[4:8] # type: ignore
-        """
-        The simulated error (array) for Alice.
-
-        This variable represents the simulated error for Alice. It is used to simulate the error 
-        for Alice's entanglement propagation.
-        """
-        self.fixed_error_ctrl_bob = fixed_error[8:12] # type: ignore
-        """
-        The simulated error (array) for Bob.
-
-        This variable represents the simulated error for Bob. It is used to simulate the error 
-        for Bob's entanglement propagation.
-        """
-        self.fixed_errors_flags = np.repeat(False, 12)
+        self.nr_fibre_segments = fibre_segments
+        self.fixed_errors = np.zeros(fibre_segments)
+        self.fixed_errors_flags = np.repeat(False, fibre_segments)
         """
         The fixed error flags.
         
@@ -206,8 +193,8 @@ class WeatherControlledFixedEnv:
         self.ctrl_alice = a_alice
         self.ctrl_bob = a_bob
 
-        # create a fibrelink segment
-        link = FibreLink()
+        # create fibrelink segments
+        links = [FibreLink() for _ in range(self.nr_fibre_segments)]
 
         # *: assume our MDP state is the size of the latency in control
         for ctrl_latency_counter in range(self.latency + 1):
@@ -217,25 +204,19 @@ class WeatherControlledFixedEnv:
 
             # compute the move the angles based on the motion model or fixed
             phi_move = []
-            # concatenate the fixed errors
-            _errs = np.concatenate(
-                (
-                    self.fixed_error_ctrl_pump,
-                    self.fixed_error_ctrl_alice,
-                    self.fixed_error_ctrl_bob,
-                )
-            )
-            for i in range(12):
+            for i in range(len(links)):
                 # if the error is fixed, we append the fixed error
                 if self.fixed_errors_flags[i]:
-                    phi_move.append(_errs[i])
+                    phi_move.append(self.fixed_errors[i])
                 else:
                     # otherwise we append the random error
-                    phi_move.append(self.phi[i].move(self.t))
-
+                    phi_move.append(self.phi[i].compute_sample(links[0]))
+           
             # rotation of the pump in the source -- +
             # *: here is where we do the control with @gate
-            pump_polarisation = polarisation_from_force(10, link) @ self.H
+            # ? but this error does not come from the propagation, but from the source generation?
+            # pump_polarisation = polar_control(phi_move[0:4]) @ self.H
+            pump_polarisation = self.H # ^^^
             pump_polarisation = (
                 np.linalg.inv(polar_control(self.ctrl_pump_current)) @ pump_polarisation
             )
@@ -244,10 +225,9 @@ class WeatherControlledFixedEnv:
             entangled_state = entangler(pump_polarisation)
             # rotation of the entangled state during the propagation -- gives
             # entangled state at next time step
-            entangled_state_propag = (
-                np.kron(polar_control(phi_move[4:8]), polar_control(phi_move[8:12]))
-                @ entangled_state
-            )
+            entangled_state_propag = entangled_state
+            for phi in phi_move:
+                entangled_state_propag = np.kron(entangled_state_propag, phi)
 
             # *: here is where we do the control with np.kron
             entangled_state_propag = (
@@ -265,13 +245,13 @@ class WeatherControlledFixedEnv:
                 self.ctrl_pump_current = self.ctrl_pump
 
             # append the angles for plotting
-            self.phi_history.append(phi_move)
+            # self.phi_history.append(phi_move)
             # compute the QBERs
             qbers_current = compute_qber(entangled_state_propag)
             self.qber_history.append(qbers_current)
 
             # if we exceed max t
-            if self.t >= self.max_t:
+            if self.step_count >= self.max_steps:
                 self.done = True
                 break
 
@@ -289,6 +269,10 @@ class WeatherControlledFixedEnv:
             state (object): The current state of the environment.
         """
         self.t = 0.0
+        self.step_count = 0
+        # reset the wind models
+        for phi in self.phi:
+            phi.reset()
         self.done = False
         self.qber_history = []
         self.phi_history = []
@@ -304,14 +288,14 @@ class WeatherControlledFixedEnv:
         """
         return np.array(self.qber_history)
 
-    def get_phi(self):
-        """
-        Returns the phi history as a numpy array.
+    # def get_phi(self):
+    #     """
+    #     Returns the phi history as a numpy array.
 
-        Returns:
-            numpy.ndarray: The phi history.
-        """
-        return np.array(self.phi_history)
+    #     Returns:
+    #         numpy.ndarray: The phi history.
+    #     """
+    #     return np.array(self.phi_history)
 
     def get_state(self):
         """

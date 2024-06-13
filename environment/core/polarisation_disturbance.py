@@ -1,5 +1,5 @@
 import numpy as np
-from fibre_cable import FibreLink
+from .fibre_cable import FibreLink
 
 def polarisation_from_force(force : float, cable : FibreLink):
     delta_n = 0.5

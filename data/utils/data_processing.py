@@ -16,6 +16,8 @@ def load_historical_weather_data():
     data.dropna(inplace=True)
     data['time'] = data['time'].str.replace('T', ' ')
     data.rename(columns={'temperature_2m (°C)': 'temperature'}, inplace=True)
+    data.rename(columns={'wind_speed_10m (km/h)': 'wind_speed'}, inplace=True)
+    data.rename(columns={'wind_direction_10m (°)': 'wind_direction'}, inplace=True)
     return data
 
 def select_samples(data, n, k):
