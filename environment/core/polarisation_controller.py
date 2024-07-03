@@ -26,7 +26,7 @@ def polar_control(
     """
     # if not arguments supplied, return error
     if phis is None and (phi1 is None or phi2 is None or phi3 is None or phi4 is None):
-        raise ValueError("At least all phase angle must be supplied.")
+        raise ValueError("At least all phase angles must be supplied.")
 
     # Rotation matrix for a positive 45 degree rotation
     rotp45 = np.matrix(
