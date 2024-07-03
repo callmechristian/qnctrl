@@ -12,5 +12,5 @@ def polarisation_from_force(force : float, cable : FibreLink):
     gamma = delta * cable.cable_length # phase retardation
 
     # Gamma = phase retardation
-    rot = np.array([[np.exp(-1.0j * gamma / 2), 0], [0, np.exp(1.0j * gamma / 2)]])
+    rot = np.matrix([[np.exp(-1.0j * gamma / 2), 0], [0, np.exp(1.0j * gamma / 2)]])
     return rot
