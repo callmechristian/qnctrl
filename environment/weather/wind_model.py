@@ -27,7 +27,13 @@ class WindModel:
         )  # N
         
         self.next_sample()
-        return polarisation_from_force(F, fibre_cable)
+        
+        # moment of force will be according to incident wind
+        angle_in_rad = self.wind_direction[self.index] * np.pi / 180
+        force_rot_dir = np.matrix(
+            [[np.cos(angle_in_rad), np.sin(angle_in_rad)], [-np.sin(angle_in_rad), np.cos(angle_in_rad)]]
+        )
+        return force_rot_dir @ polarisation_from_force(F, fibre_cable)
 
     def next_sample(self):
         self.index += 1
