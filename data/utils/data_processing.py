@@ -8,7 +8,7 @@ def load_historical_weather_data():
         pandas.DataFrame: The loaded weather data.
     """
     # Path to the CSV file
-    csvfile = '../../data/open-meteo-43.69N7.19E17m.csv'
+    csvfile = 'data/open-meteo-43.69N7.19E17m.csv'
 
     # Read the CSV file using pandas
     data = pd.read_csv(csvfile)
