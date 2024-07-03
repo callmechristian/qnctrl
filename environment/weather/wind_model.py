@@ -33,7 +33,7 @@ class WindModel:
         force_rot_dir = np.matrix(
             [[np.cos(angle_in_rad), np.sin(angle_in_rad)], [-np.sin(angle_in_rad), np.cos(angle_in_rad)]]
         )
-        return force_rot_dir @ polarisation_from_force(F, fibre_cable)
+        return (force_rot_dir @ polarisation_from_force(F, fibre_cable), F)
 
     def next_sample(self):
         self.index += 1

@@ -27,7 +27,7 @@ import numpy as np
 
 from ..core import polar_control, entangler, compute_qber, FibreLink, polarisation_from_force
 from ..weather.wind_model import WindModel
-from ...data.utils.data_processing import load_historical_weather_data
+from data.utils.data_processing import load_historical_weather_data
 
 class WeatherControlledFixedEnv:
     """
@@ -67,7 +67,7 @@ class WeatherControlledFixedEnv:
         step_time: float = 60,
         latency: int = 3,
         fixed_error: np.array = np.zeros(12),
-        fibre_segments: int = 1,
+        fibre_segments: int = 2,
     ):
         """
         Initializes an instance of SimpleEnv.
@@ -169,6 +169,10 @@ class WeatherControlledFixedEnv:
         """
         The done flag.
         """
+        self.Fs: List[List[float]] = [[] for _ in range(fibre_segments)]
+        """
+        Stores compute Force applied on fibre segments
+        """
 
     def step(
         self,
@@ -204,36 +208,50 @@ class WeatherControlledFixedEnv:
 
             # compute the move the angles based on the motion model or fixed
             phi_move = []
-            for i in range(len(links)):
+            for i, link in enumerate(links):
                 # if the error is fixed, we append the fixed error
                 if self.fixed_errors_flags[i]:
                     phi_move.append(self.fixed_errors[i])
                 else:
                     # otherwise we append the random error
-                    phi_move.append(self.phi[i].compute_sample(links[0]))
+                    rot_mat, f = self.phi[i].compute_sample(link)
+                    phi_move.append(rot_mat)
+                    self.Fs[i].append(f)
            
             # rotation of the pump in the source -- +
             # *: here is where we do the control with @gate
             # ? but this error does not come from the propagation, but from the source generation?
             # pump_polarisation = polar_control(phi_move[0:4]) @ self.H
-            pump_polarisation = self.H # ^^^
+            pump_polarisation = phi_move[0] @ self.H # ^^^
             pump_polarisation = (
-                np.linalg.inv(polar_control(self.ctrl_pump_current)) @ pump_polarisation
+                polar_control(self.ctrl_pump_current) @ pump_polarisation
             )
+            # print("State after Pump control")
+            # print(pump_polarisation)
 
             # generation of the entangled state
             entangled_state = entangler(pump_polarisation)
             # rotation of the entangled state during the propagation -- gives
             # entangled state at next time step
             entangled_state_propag = entangled_state
-            for phi in phi_move:
-                entangled_state_propag = np.kron(entangled_state_propag, phi)
+            # print("state after entanglement")
+            # print(entangled_state_propag)
+            # print("States after phi_move")
+            for i, phi in enumerate(phi_move):
+                if i < len(phi_move) - 1:
+                    kron = np.kron(phi, phi_move[i+1])
+                    entangled_state_propag = kron @ entangled_state_propag
 
             # *: here is where we do the control with np.kron
+            # print(np.kron(
+            #         polar_control(self.ctrl_alice_current),
+            #         polar_control(self.ctrl_bob_current),
+            #     ))
+            # print(entangled_state_propag)
             entangled_state_propag = (
                 np.kron(
-                    np.linalg.inv(polar_control(self.ctrl_alice_current)),
-                    np.linalg.inv(polar_control(self.ctrl_bob_current)),
+                    polar_control(self.ctrl_alice_current),
+                    polar_control(self.ctrl_bob_current),
                 )
                 @ entangled_state_propag
             )
@@ -248,6 +266,7 @@ class WeatherControlledFixedEnv:
             # self.phi_history.append(phi_move)
             # compute the QBERs
             qbers_current = compute_qber(entangled_state_propag)
+            self.qbers_current = qbers_current
             self.qber_history.append(qbers_current)
 
             # if we exceed max t
@@ -335,3 +354,21 @@ class WeatherControlledFixedEnv:
             The value of the 't' attribute.
         """
         return self.t
+
+    def get_qber_x_current(self):
+        """
+        Returns the current QBERx value.
+        
+        Returns:
+            The current QBERx value.
+        """
+        return self.qbers_current[1]
+    
+    def get_qber_z_current(self):
+        """
+        Returns the current QBERz value.
+        
+        Returns:
+            The current QBERz value.
+        """
+        return self.qbers_current[0]
