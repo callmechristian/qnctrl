@@ -4,7 +4,7 @@ from .fibre_cable import FibreLink
 def polarisation_from_force(force : float, cable : FibreLink):
     delta_n = 0.5
     # the difference between the fast axis and the slow axis
-    # will be 90 degrees because we assume the wind hinds the fibre only laterally
+    # will be 90 degrees because we assume the wind hits the fibre only laterally
     rfi = 6 * 10 ** -5 # refractive index difference
     d = cable.cable_radius * 2 # diameter of the cable
     lbda = 400 * 10 ** -9 # wavelength of light = assume 400 nm
