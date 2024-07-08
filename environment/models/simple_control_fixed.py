@@ -176,6 +176,12 @@ class SimpleControlledFixedEnv:
         """
         The done flag.
         """
+        self.setting_inverse = False
+        """
+        If the control should be applied in inverse.
+        
+        I.e.: np.linalg(control_array) @ state instead of control_array @ state
+        """
 
     def step(
         self,
@@ -226,9 +232,13 @@ class SimpleControlledFixedEnv:
             # rotation of the pump in the source -- +
             # *: here is where we do the control with @gate
             pump_polarisation = polar_control(phi_move[0:4]) @ self.H
-            pump_polarisation = (
-                np.linalg.inv(polar_control(self.ctrl_pump_current)) @ pump_polarisation
-            )
+            if self.setting_inverse:
+                pump_polarisation = (
+                    np.linalg.inv(polar_control(self.ctrl_pump_current)) @ pump_polarisation
+                )
+            else:
+                print(self.ctrl_pump_current)
+                pump_polarisation = polar_control(self.ctrl_pump_current) @ pump_polarisation
 
             # generation of the entangled state
             entangled_state = entangler(pump_polarisation)
@@ -240,18 +250,28 @@ class SimpleControlledFixedEnv:
             )
 
             # *: here is where we do the control with np.kron
-            entangled_state_propag = (
-                np.kron(
-                    np.linalg.inv(polar_control(self.ctrl_alice_current)),
-                    np.linalg.inv(polar_control(self.ctrl_bob_current)),
+            if self.setting_inverse:
+                entangled_state_propag = (
+                    np.kron(
+                        np.linalg.inv(polar_control(self.ctrl_alice_current)),
+                        np.linalg.inv(polar_control(self.ctrl_bob_current)),
+                    )
+                    @ entangled_state_propag
                 )
-                @ entangled_state_propag
-            )
+            else:
+                entangled_state_propag = (
+                    np.kron(
+                        polar_control(self.ctrl_alice_current),
+                        polar_control(self.ctrl_bob_current),
+                    )
+                    @ entangled_state_propag
+                )
 
             # *: update control actual values to the current control values
             if ctrl_latency_counter == self.latency:
                 self.ctrl_alice_current = self.ctrl_alice
                 self.ctrl_bob_current = self.ctrl_bob
+                print(self.ctrl_pump)
                 self.ctrl_pump_current = self.ctrl_pump
 
             # append the angles for plotting
