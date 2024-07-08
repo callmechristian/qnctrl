@@ -51,7 +51,10 @@ def polar_control(
         return np.matrix([[1, 0], [0, np.exp(1.0j * phi)]])
 
     if phis is not None:
-        phi1, phi2, phi3, phi4 = phis
+        # print(f"phis: {phis} phis[0]: {phis[0]}")
+        if len(phis) != 4:
+            phis = phis[0]
+        [phi1, phi2, phi3, phi4] = phis
     return (
         phase(phi1)
         @ rotp45

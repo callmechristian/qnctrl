@@ -202,6 +202,8 @@ class SimpleControlledFixedEnv:
         """
 
         # set self control gates to action
+        # print("Actions ctrl:")
+        # print(a_pump, a_alice, a_bob)
         self.ctrl_pump = a_pump
         self.ctrl_alice = a_alice
         self.ctrl_bob = a_bob
@@ -237,7 +239,7 @@ class SimpleControlledFixedEnv:
                     np.linalg.inv(polar_control(self.ctrl_pump_current)) @ pump_polarisation
                 )
             else:
-                print(self.ctrl_pump_current)
+                # print(f"passed: {self.ctrl_pump_current}")
                 pump_polarisation = polar_control(self.ctrl_pump_current) @ pump_polarisation
 
             # generation of the entangled state
@@ -271,7 +273,7 @@ class SimpleControlledFixedEnv:
             if ctrl_latency_counter == self.latency:
                 self.ctrl_alice_current = self.ctrl_alice
                 self.ctrl_bob_current = self.ctrl_bob
-                print(self.ctrl_pump)
+                # print(f"ctrl pump current assigned: {self.ctrl_pump}")
                 self.ctrl_pump_current = self.ctrl_pump
 
             # append the angles for plotting
@@ -302,8 +304,16 @@ class SimpleControlledFixedEnv:
         self.done = False
         self.qber_history = []
         self.phi_history = []
-        self.step()
-        return self.get_state()
+        self.ctrl_pump_current = np.zeros(4)
+        self.ctrl_alice_current = np.zeros(4)
+        self.ctrl_bob_current = np.zeros(4)
+        self.ctrl_alice = np.zeros(4)
+        self.ctrl_bob = np.zeros(4)
+        self.ctrl_pump = np.zeros(4)
+        # print(self.ctrl_pump_current)
+        s, r, _ = self.step()
+        # print(f"reset: {s}")
+        return s, r
 
     def get_qber(self):
         """
@@ -340,7 +350,7 @@ class SimpleControlledFixedEnv:
             float: The reward value.
         """
         qber = self.qber_history[-1]
-        reward = -1 * (qber[0] + qber[1])
+        reward = -(qber[0])**8 # + (1 - qber[1])**2
         return reward
 
     def get_done(self):
