@@ -361,10 +361,10 @@ class SimpleControlledFixedEnv:
         """
         qber = self.qber_history[-1]
         bonus = 0
-        if qber[0] < 0.05 and qber[1] < 0.05:
+        if qber[0] < 0.05: #and qber[1] < 0.05:
             bonus = 10
         
-        reward = (2 - qber[0] - qber[1]) + bonus # + (1 - qber[1])**2
+        reward = 1 - qber[0] + bonus # + (1 - qber[1])**2
         return reward
 
     def get_done(self):
