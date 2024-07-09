@@ -164,7 +164,7 @@ class SimpleControlledFixedEnv:
         """
         The QBER history.
         
-        This variable represents the history of the QBER values.
+        This variable represents the history of the QBER values as [sample][QBERz, QBERx].
         """
         self.phi_history: List[np.array]  = []
         """
@@ -181,6 +181,10 @@ class SimpleControlledFixedEnv:
         If the control should be applied in inverse.
         
         I.e.: np.linalg(control_array) @ state instead of control_array @ state
+        """
+        self.setting_single = False
+        """
+        If the control should be applied in single gate: state @ control_array. This will be done using Alice's gate.
         """
 
     def step(
@@ -234,13 +238,16 @@ class SimpleControlledFixedEnv:
             # rotation of the pump in the source -- +
             # *: here is where we do the control with @gate
             pump_polarisation = polar_control(phi_move[0:4]) @ self.H
-            if self.setting_inverse:
-                pump_polarisation = (
-                    np.linalg.inv(polar_control(self.ctrl_pump_current)) @ pump_polarisation
-                )
+            if self.setting_single:
+                pass
             else:
-                # print(f"passed: {self.ctrl_pump_current}")
-                pump_polarisation = polar_control(self.ctrl_pump_current) @ pump_polarisation
+                if self.setting_inverse:
+                    pump_polarisation = (
+                        np.linalg.inv(polar_control(self.ctrl_pump_current)) @ pump_polarisation
+                    )
+                else:
+                    # print(f"passed: {self.ctrl_pump_current}")
+                    pump_polarisation = polar_control(self.ctrl_pump_current) @ pump_polarisation
 
             # generation of the entangled state
             entangled_state = entangler(pump_polarisation)
@@ -251,23 +258,26 @@ class SimpleControlledFixedEnv:
                 @ entangled_state
             )
 
-            # *: here is where we do the control with np.kron
-            if self.setting_inverse:
-                entangled_state_propag = (
-                    np.kron(
-                        np.linalg.inv(polar_control(self.ctrl_alice_current)),
-                        np.linalg.inv(polar_control(self.ctrl_bob_current)),
-                    )
-                    @ entangled_state_propag
-                )
+            if self.setting_single:
+                entangled_state_propag = polar_control(self.ctrl_alice_current) @ entangled_state_propag
             else:
-                entangled_state_propag = (
-                    np.kron(
-                        polar_control(self.ctrl_alice_current),
-                        polar_control(self.ctrl_bob_current),
+                # *: here is where we do the control with np.kron
+                if self.setting_inverse:
+                    entangled_state_propag = (
+                        np.kron(
+                            np.linalg.inv(polar_control(self.ctrl_alice_current)),
+                            np.linalg.inv(polar_control(self.ctrl_bob_current)),
+                        )
+                        @ entangled_state_propag
                     )
-                    @ entangled_state_propag
-                )
+                else:
+                    entangled_state_propag = (
+                        np.kron(
+                            polar_control(self.ctrl_alice_current),
+                            polar_control(self.ctrl_bob_current),
+                        )
+                        @ entangled_state_propag
+                    )
 
             # *: update control actual values to the current control values
             if ctrl_latency_counter == self.latency:
@@ -320,7 +330,7 @@ class SimpleControlledFixedEnv:
         Returns the history of QBER (Quantum Bit Error Rate) as a numpy array.
 
         Returns:
-            numpy.ndarray: The history of QBER values.
+            numpy.ndarray: The history of QBER values as [QBERz, QBERx].
         """
         return np.array(self.qber_history)
 
@@ -350,7 +360,11 @@ class SimpleControlledFixedEnv:
             float: The reward value.
         """
         qber = self.qber_history[-1]
-        reward = -(qber[0])**8 # + (1 - qber[1])**2
+        bonus = 0
+        if qber[0] < 0.05 and qber[1] < 0.05:
+            bonus = 10
+        
+        reward = (2 - qber[0] - qber[1]) + bonus # + (1 - qber[1])**2
         return reward
 
     def get_done(self):
