@@ -367,7 +367,7 @@ class SimpleControlledFixedEnv:
         if qber[1] < 0.05:
             bonus_x = 10
         
-        reward = -1 - qber[0] - qber[1] + bonus_z + bonus_x
+        reward = -5*qber[0] -5*qber[1]
         return reward
 
     def get_done(self):

@@ -1,0 +1,28 @@
+Parameter,Value
+uid,c45365bc-6f1c-40b6-979b-e3bd633791e4
+date_completed,2024-07-11 15:51:34.861893
+total_episodes,1000
+gamma,0.8
+tau,0.005
+num_actions,1
+num_states,2
+lower_bound,-3.141592653589793
+upper_bound,3.141592653589793
+ep_running_average,10
+buffer_size,5000
+TARGET_REWARD,0
+max_env_steps,1000
+latency,1
+actor_lr,0.001
+critic_lr,0.01
+std_dev,0.2
+env.delta_t,0.01
+env.max_t,2
+env_type,SimpleControlledFixedEnv
+env.fixed_errors_flags,"[True, True, True, True, False, True, True, True, True, True, True, True]"
+env.fixed_error_ctrl_pump,"[0, 0, 0, 0]"
+env.fixed_error_ctrl_alice,"[3.141592653589793, 0, 0, 0]"
+env.fixed_error_ctrl_bob,"[0, 0, 0, 0]"
+total_training_time,2012.4098811149597
+avg_time_per_ep,2.0124098811149596
+note,-5 times scaled negative reward onlyZ
