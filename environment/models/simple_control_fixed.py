@@ -62,7 +62,7 @@ class SimpleControlledFixedEnv:
     def __init__(
         self,
         t0: float = 0,
-        max_t: float = 0.2,
+        max_t: float = 1440,
         latency: int = 3,
         fixed_error: np.array = np.zeros(12),
     ):
@@ -95,9 +95,9 @@ class SimpleControlledFixedEnv:
 
         This variable represents the maximum simulation time.
         """
-        self.delta_t = 0.0001  # speed of the error fluctuation
+        self.delta_t = 1  # speed of the samping
         """
-        The speed of the error fluctuation.
+        The speed of the sampling.
 
         The frequency of the error model: lower values mean less fluctuation.
         """

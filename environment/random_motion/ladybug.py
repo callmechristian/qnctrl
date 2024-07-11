@@ -37,7 +37,9 @@ class LadyBug:
         """
         if s > 0:
             seed(s)
-        self.params_x = [gauss(0.0, 1.0) for u in range(8)]
+        
+        self.params_amplitude = [gauss(0.0, 0.01) for u in range(4)]
+        self.params_pulsation = [gauss(0.01, 0.1) for u in range(4)]
 
     def move(self, t: float):
         """
@@ -49,13 +51,18 @@ class LadyBug:
         Returns:
             float: The calculated movement of the ladybug model at time t.
         """
-        [ax1, ax2, ax3, ax4, kx1, kx2, kx3, kx4] = self.params_x
+        [ax1, ax2, ax3, ax4] = self.params_amplitude
+        [kx1, kx2, kx3, kx4] = self.params_pulsation
+
+        # parameters close to a day representation
+        ax1 = 1
+        kx1 = 0.001
 
         x = (
-            ax1 * sin(t * (kx1 + 20))
-            + ax2 * cos(t * (kx2 + 10))
-            + ax3 * sin(t * (kx3 + 5))
-            + ax4 * cos(t * (kx4 + 5))
+            ax1 * sin(t * (kx1))
+            + ax2 * cos(t * (kx2))
+            + ax3 * sin(t * (kx3))
+            + ax4 * cos(t * (kx4))
         )
 
         return x
