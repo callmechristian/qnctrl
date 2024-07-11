@@ -360,11 +360,14 @@ class SimpleControlledFixedEnv:
             float: The reward value.
         """
         qber = self.qber_history[-1]
-        bonus = 0
+        bonus_z = 0
         if qber[0] < 0.05: #and qber[1] < 0.05:
-            bonus = 10
+            bonus_z = 10
+        bonus_x = 0
+        if qber[1] < 0.05:
+            bonus_x = 10
         
-        reward = 1 - qber[0] + bonus # + (1 - qber[1])**2
+        reward = -1 - qber[0] - qber[1] + bonus_z + bonus_x
         return reward
 
     def get_done(self):
