@@ -1,6 +1,3 @@
-latitude,longitude,elevation,utc_offset_seconds,timezone,timezone_abbreviation
-43.690685,7.1945705,17.0,7200,Europe/Berlin,CEST
-
 time,temperature_2m (°C),rain (mm),wind_speed_10m (km/h),wind_direction_10m (°)
 2024-01-01T00:00,8.7,0.00,8.6,285
 2024-01-01T01:00,8.5,0.00,9.0,299
