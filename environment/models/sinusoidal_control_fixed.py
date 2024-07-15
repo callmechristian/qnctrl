@@ -67,6 +67,7 @@ class SinusoidalControlledFixedEnv:
         latency: int = 3,
         fixed_error: np.array = np.zeros(12),
         sinusoidal_components: int = 4,
+        seed: int = 0,
     ):
         """
         Initializes an instance of SinusoidalControlFixedEnv.
@@ -81,9 +82,11 @@ class SinusoidalControlledFixedEnv:
         # the polarization vector of the pump
         self.H = 1 / np.sqrt(2) * np.matrix([[1], [1]]) # pylint: disable=invalid-name
 
+        self.seed = seed
+
         self.phi = []
-        for _ in range(12):
-            self.phi.append(NSinusoidal(n=sinusoidal_components))
+        for i in range(12):
+            self.phi.append(NSinusoidal(n=sinusoidal_components, s=seed + i))
 
         self.t = t0 + 0.0
         """
@@ -224,6 +227,7 @@ class SinusoidalControlledFixedEnv:
         self.ctrl_bob = sinusoidal_control(self.t, a_bob)
         
         # print(f"p: {self.ctrl_pump} a: {self.ctrl_alice} b: {self.ctrl_bob}")
+        reward_ctr = 0.0
 
         # *: assume our MDP state is the size of the latency in control
         for ctrl_latency_counter in range(self.latency + 1):
@@ -292,25 +296,31 @@ class SinusoidalControlledFixedEnv:
                         @ entangled_state_propag
                     )
 
-            # *: update control actual values to the current control values
-            if ctrl_latency_counter == self.latency:
-                self.ctrl_alice_current = self.ctrl_alice
-                self.ctrl_bob_current = self.ctrl_bob
-                # print(f"ctrl pump current assigned: {self.ctrl_pump}")
-                self.ctrl_pump_current = self.ctrl_pump
-
             # append the angles for plotting
             self.phi_history.append(phi_move)
             # compute the QBERs
             qbers_current = compute_qber(entangled_state_propag)
             self.qber_history.append(qbers_current)
 
+            reward_ctr += self.get_reward()
+            reward = 0
+            # *: update control actual values to the current control values
+            if ctrl_latency_counter == self.latency:
+                self.ctrl_alice_current = self.ctrl_alice
+                self.ctrl_bob_current = self.ctrl_bob
+                # print(f"ctrl pump current assigned: {self.ctrl_pump}")
+                self.ctrl_pump_current = self.ctrl_pump
+                
+                # compute reward
+                reward = self.get_reward()
+                reward_ctr = 0
+
             # if we exceed max t
             if self.t >= self.max_t:
                 self.done = True
                 break
 
-        return self.get_state(), self.get_reward(), self.get_done()
+        return self.get_states(), reward, self.get_done()
 
     def reset(self):
         """
@@ -364,6 +374,15 @@ class SinusoidalControlledFixedEnv:
             np.array(2): first QBERz, then QBERx
         """
         return self.qber_history[-1]
+    
+    def get_states(self):
+        """
+        Returns the last states of the environment as a numpy array of the two QBERs of length LATENCY.
+
+        Returns:
+            [np.array(2), ...]: first QBERz, then QBERx
+        """
+        return self.qber_history[-self.latency:]
 
     def get_reward(self):
         """
@@ -384,7 +403,7 @@ class SinusoidalControlledFixedEnv:
         # if qber[0] < 0.05 and qber[1] < 0.05:
         #     bonus_zx = 0.1
         
-        reward = -0.5*qber[0] -0.5*qber[1]
+        reward = -qber[0] -qber[1]
         # reward = bonus_zx
         return reward
 

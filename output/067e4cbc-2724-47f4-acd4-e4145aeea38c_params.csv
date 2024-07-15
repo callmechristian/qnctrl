@@ -1,0 +1,29 @@
+Parameter,Value
+uid,067e4cbc-2724-47f4-acd4-e4145aeea38c
+date_completed,2024-07-15 10:53:43.067042
+total_episodes,800
+gamma,0.99
+tau,0.005
+num_actions,4
+num_states,2
+lower_bound,0.0
+upper_bound,1.0
+ep_running_average,5
+buffer_size,30000
+TARGET_REWARD,0
+max_env_steps,300
+latency,20
+actor_lr,0.001
+critic_lr,0.002
+std_dev,0.5
+env.delta_t,0.1
+env.max_t,30.0
+env_type,SinusoidalControlledFixedEnv
+env.fixed_errors_flags,"[True, True, True, True, False, True, True, True, True, True, True, True]"
+env.fixed_error_ctrl_pump,"[0, 0, 0, 0]"
+env.fixed_error_ctrl_alice,"[3.141592653589793, 0, 0, 0]"
+env.fixed_error_ctrl_bob,"[0, 0, 0, 0]"
+total_training_time,219.69816255569458
+avg_time_per_ep,0.27462270319461823
+baseline_reward,-8.488308675554427
+note,onlyZ nsinus no_critic_batch_norm_NN
