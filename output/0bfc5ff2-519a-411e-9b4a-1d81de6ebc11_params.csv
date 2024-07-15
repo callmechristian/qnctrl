@@ -1,0 +1,29 @@
+Parameter,Value
+uid,0bfc5ff2-519a-411e-9b4a-1d81de6ebc11
+date_completed,2024-07-15 00:49:28.524375
+total_episodes,100
+gamma,0.1
+tau,0.001
+num_actions,4
+num_states,2
+lower_bound,0.0
+upper_bound,1.0
+ep_running_average,5
+buffer_size,30000
+TARGET_REWARD,0
+max_env_steps,100
+latency,1
+actor_lr,0.001
+critic_lr,0.01
+std_dev,0.2
+env.delta_t,0.1
+env.max_t,10.0
+env_type,SinusoidalControlledFixedEnv
+env.fixed_errors_flags,"[True, True, True, True, False, True, True, True, True, True, True, True]"
+env.fixed_error_ctrl_pump,"[0, 0, 0, 0]"
+env.fixed_error_ctrl_alice,"[3.141592653589793, 0, 0, 0]"
+env.fixed_error_ctrl_bob,"[0, 0, 0, 0]"
+total_training_time,47.2070517539978
+avg_time_per_ep,0.47207051753997803
+baseline_reward,-9.225257190915276
+note,reward -0.5 onlyZ nsinus
