@@ -53,7 +53,7 @@ def prob_det(
     rho = entangled_state @ entangled_state.H
 
     # Calculate the probability of detecting the specified outcome
-    return np.abs(np.trace(np.kron(alice, bob) @ rho))
+    return round(np.abs(np.trace(np.kron(alice, bob) @ rho)), 2)
 
 
 def compute_qber(entangled_state: np.matrix):
