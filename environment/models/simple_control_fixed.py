@@ -89,7 +89,7 @@ class SimpleControlledFixedEnv:
                 self.phi.append(LadyBug())
         elif noise_model == "sinusoidal":
             for i in range(12):
-                self.phi.append(NSinusoidal(n=sinusoidal_components, s=seed + i)) # type: ignore
+                self.phi.append(NSinusoidal(n=sinusoidal_components, s=seed + i if seed > 0 else 0)) # type: ignore
 
         self.t = t0 + 0.0
         """
@@ -313,7 +313,7 @@ class SimpleControlledFixedEnv:
                 self.done = True
                 break
         
-        if(self.latency == 1):
+        if(self.latency == 0):
             _ret_states = self.get_state()
         else:
             _ret_states = self.get_states()

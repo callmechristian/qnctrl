@@ -28,6 +28,8 @@ class NSinusoidal:
         """
         if s > 0:
             seed(s)
+        else:
+            seed(randint(0, 1000000))
 
         # if random is True, assign a random value to n regardless of the input
         if random:
