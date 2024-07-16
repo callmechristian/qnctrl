@@ -1,0 +1,29 @@
+Parameter,Value
+uid,2eff319b-832f-40e9-8235-235ddaf645d9
+date_completed,2024-07-16 10:21:05.991464
+total_episodes,30
+gamma,0.99
+tau,0.005
+num_actions,4
+num_states,2
+lower_bound,-3.141592653589793
+upper_bound,3.141592653589793
+ep_running_average,5
+buffer_size,30000
+TARGET_REWARD,0
+max_env_steps,1440
+latency,200
+actor_lr,0.001
+critic_lr,0.002
+std_dev,0.4
+env.delta_t,1
+env.max_t,1440
+env_type,SimpleControlledFixedEnv
+env.fixed_errors_flags,"[True, True, True, True, False, False, False, False, True, True, True, True]"
+env.fixed_error_ctrl_pump,"[0, 0, 0, 0]"
+env.fixed_error_ctrl_alice,"[3.141592653589793, 0, 0, 0]"
+env.fixed_error_ctrl_bob,"[0, 0, 0, 0]"
+total_training_time,25.659399032592773
+avg_time_per_ep,0.8553133010864258
+baseline_reward,-829.0726095740312
+note,onlyZ new ladybug

@@ -1,0 +1,29 @@
+Parameter,Value
+uid,e87ca256-5f08-4ba4-b245-ab3453878739
+date_completed,2024-07-16 12:37:54.422866
+total_episodes,400
+gamma,0.99
+tau,0.005
+num_actions,4
+num_states,2
+lower_bound,-1.0
+upper_bound,1.0
+ep_running_average,5
+buffer_size,30000
+TARGET_REWARD,0
+max_env_steps,1000
+latency,200
+actor_lr,0.001
+critic_lr,0.002
+std_dev,0.4
+env.delta_t,0.1
+env.max_t,100.0
+env_type,SinusoidalControlledFixedEnv
+env.fixed_errors_flags,"[True, True, True, True, False, True, True, True, True, True, True, True]"
+env.fixed_error_ctrl_pump,"[0, 0, 0, 0]"
+env.fixed_error_ctrl_alice,"[3.141592653589793, 0, 0, 0]"
+env.fixed_error_ctrl_bob,"[0, 0, 0, 0]"
+total_training_time,212.35717940330505
+avg_time_per_ep,0.5308929485082626
+baseline_reward,-343.2082766328092
+note,onlyZ nsinus actorNN_with_leakyReLu

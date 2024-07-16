@@ -26,7 +26,7 @@ from typing import List
 import numpy as np
 
 from ..core import polar_control, entangler, compute_qber
-from ..random_motion import LadyBug
+from ..random_motion import LadyBug, NSinusoidal
 
 class SimpleControlledFixedEnv:
     """
@@ -65,6 +65,9 @@ class SimpleControlledFixedEnv:
         max_t: float = 1440,
         latency: int = 3,
         fixed_error: np.array = np.zeros(12),
+        sinusoidal_components: int = 1,
+        seed: int = 0,
+        noise_model: str = "ladybug"
     ):
         """
         Initializes an instance of SimpleEnv.
@@ -80,8 +83,13 @@ class SimpleControlledFixedEnv:
         self.H = 1 / np.sqrt(2) * np.matrix([[1], [1]]) # pylint: disable=invalid-name
 
         self.phi = []
-        for _ in range(12):
-            self.phi.append(LadyBug())
+        
+        if noise_model == "ladybug":
+            for _ in range(12):
+                self.phi.append(LadyBug())
+        elif noise_model == "sinusoidal":
+            for i in range(12):
+                self.phi.append(NSinusoidal(n=sinusoidal_components, s=seed + i)) # type: ignore
 
         self.t = t0 + 0.0
         """
@@ -160,7 +168,7 @@ class SimpleControlledFixedEnv:
         self.ctrl_bob_current = np.zeros(4)
         self.ctrl_pump_current = np.zeros(4)
 
-        self.qber_history: List[float] = []
+        self.qber_history: List[List[float]] = []
         """
         The QBER history.
         
@@ -186,6 +194,9 @@ class SimpleControlledFixedEnv:
         """
         If the control should be applied in single gate: state @ control_array. This will be done using Alice's gate.
         """
+        
+        self.cumulative_reward = 0
+        self.delta = 0
 
     def step(
         self,
@@ -233,7 +244,7 @@ class SimpleControlledFixedEnv:
                     phi_move.append(_errs[i])
                 else:
                     # otherwise we append the random error
-                    phi_move.append(self.phi[i].move(self.t))
+                    phi_move.append(self.phi[i].sample(self.t))
 
             # rotation of the pump in the source -- +
             # *: here is where we do the control with @gate
@@ -278,26 +289,36 @@ class SimpleControlledFixedEnv:
                         )
                         @ entangled_state_propag
                     )
-
+                    
+            # append the angles for plotting
+            self.phi_history.append(phi_move)
+            # compute the QBERs
+            qbers_current = compute_qber(entangled_state_propag)
+            self.qber_history.append(qbers_current)
+                    
+            reward = 0
+            self.cumulative_reward += self.get_reward()
             # *: update control actual values to the current control values
             if ctrl_latency_counter == self.latency:
                 self.ctrl_alice_current = self.ctrl_alice
                 self.ctrl_bob_current = self.ctrl_bob
                 # print(f"ctrl pump current assigned: {self.ctrl_pump}")
                 self.ctrl_pump_current = self.ctrl_pump
-
-            # append the angles for plotting
-            self.phi_history.append(phi_move)
-            # compute the QBERs
-            qbers_current = compute_qber(entangled_state_propag)
-            self.qber_history.append(qbers_current)
+                reward = self.cumulative_reward
+                self.cumulative_reward = 0
+                self.delta = [self.qber_history[-self.latency][0] - qbers_current[0], self.qber_history[-self.latency][1] - qbers_current[1]] # type: ignore
 
             # if we exceed max t
             if self.t >= self.max_t:
                 self.done = True
                 break
+        
+        if(self.latency == 1):
+            _ret_states = self.get_state()
+        else:
+            _ret_states = self.get_states()
 
-        return self.get_state(), self.get_reward(), self.get_done()
+        return _ret_states, reward, self.get_done()
 
     def reset(self):
         """
@@ -351,6 +372,15 @@ class SimpleControlledFixedEnv:
             np.array(2): first QBERz, then QBERx
         """
         return self.qber_history[-1]
+    
+    def get_states(self):
+        """
+        Returns the current state of the environment as a numpy array of the two QBERs.
+
+        Returns:
+            List[np.array(2)]: first QBERz, then QBERx
+        """
+        return self.qber_history[-self.latency:]
 
     def get_reward(self):
         """
@@ -371,7 +401,7 @@ class SimpleControlledFixedEnv:
         # if qber[0] < 0.05 and qber[1] < 0.05:
         #     bonus_zx = 0.1
         
-        reward = -0.5*qber[0] -0.5*qber[1]
+        reward = -qber[0] -qber[1]
         # reward = bonus_zx
         return reward
 

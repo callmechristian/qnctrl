@@ -41,7 +41,7 @@ class LadyBug:
         self.params_amplitude = [gauss(0.0, 0.01) for u in range(4)]
         self.params_pulsation = [gauss(0.01, 0.1) for u in range(4)]
 
-    def move(self, t: float):
+    def sample(self, t: float):
         """
         Calculates the ladybug model's movement at time t.
 

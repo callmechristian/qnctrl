@@ -199,6 +199,8 @@ class SinusoidalControlledFixedEnv:
         """
         The number of sinusoidal components.
         """
+        
+        self.reward_ctr = 0.0
 
     def step(
         self,
@@ -227,7 +229,6 @@ class SinusoidalControlledFixedEnv:
         self.ctrl_bob = sinusoidal_control(self.t, a_bob)
         
         # print(f"p: {self.ctrl_pump} a: {self.ctrl_alice} b: {self.ctrl_bob}")
-        reward_ctr = 0.0
 
         # *: assume our MDP state is the size of the latency in control
         for ctrl_latency_counter in range(self.latency + 1):
@@ -302,8 +303,8 @@ class SinusoidalControlledFixedEnv:
             qbers_current = compute_qber(entangled_state_propag)
             self.qber_history.append(qbers_current)
 
-            reward_ctr += self.get_reward()
-            reward = 0
+            self.reward_ctr += self.get_reward()
+            reward = 0.0
             # *: update control actual values to the current control values
             if ctrl_latency_counter == self.latency:
                 self.ctrl_alice_current = self.ctrl_alice
@@ -312,8 +313,8 @@ class SinusoidalControlledFixedEnv:
                 self.ctrl_pump_current = self.ctrl_pump
                 
                 # compute reward
-                reward = self.get_reward()
-                reward_ctr = 0
+                reward = self.reward_ctr
+                self.reward_ctr = 0
 
             # if we exceed max t
             if self.t >= self.max_t:
