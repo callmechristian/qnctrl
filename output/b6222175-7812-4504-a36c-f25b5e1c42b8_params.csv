@@ -1,0 +1,32 @@
+Parameter,Value
+uid,b6222175-7812-4504-a36c-f25b5e1c42b8
+date_completed,2024-07-17 14:22:53.829294
+algorithm,PPO with continous action gaussian policy
+total_episodes,100
+seed,<environment.models.simple_control_fixed.SimpleControlledFixedEnv object at 0x7f2eeec27820>
+gamma,0.99
+lambda,0.99
+num_actions,2
+num_states,3
+HIDDEN_LAYER_SIZES,"(256, 256)"
+target_kl,0.01
+train_policy_iterations,180
+train_value_iterations,180
+max_env_steps,100
+latency,0
+policy_learning_rate,0.0003
+value_function_learning_rate,0.001
+clip_ration,0.1
+env_reward_type,inverse
+env.delta_t,0.1
+env.max_t,10.0
+env_type,SimpleControlledFixedEnv
+env.fixed_errors_flags,"[True, True, True, True, False, False, True, True, True, True, True, True]"
+env.fixed_error_ctrl_pump,"[0, 0, 0, 0]"
+env.fixed_error_ctrl_alice,"[3.141592653589793, 0, 0, 0]"
+env.fixed_error_ctrl_bob,"[0, 0, 0, 0]"
+total_training_time,49.30319094657898
+avg_time_per_ep,49.30319094657898
+baseline_reward,126.94924401304384
+convergence_reward,143.59454945124722
+note,
