@@ -22,11 +22,12 @@ This module imports the following packages:
 - LadyBug from the random_motion module
 """
 
-from typing import List
+from typing import List, Union
 import numpy as np
 
 from ..core import polar_control, entangler, compute_qber
 from ..random_motion import LadyBug, NSinusoidal
+
 
 class SimpleControlledFixedEnv:
     """
@@ -68,7 +69,7 @@ class SimpleControlledFixedEnv:
         sinusoidal_components: int = 1,
         seed: int = 0,
         noise_model: str = "ladybug",
-        reward_type: str = "negative"
+        reward_type: str = "negative",
     ):
         """
         Initializes an instance of SimpleEnv.
@@ -81,16 +82,18 @@ class SimpleControlledFixedEnv:
             None
         """
         # the polarization vector of the pump
-        self.H = 1 / np.sqrt(2) * np.matrix([[1], [1]]) # pylint: disable=invalid-name
+        self.H = 1 / np.sqrt(2) * np.matrix([[1], [1]])  # pylint: disable=invalid-name
 
-        self.phi = []
-        
+        self.phi: List[Union[LadyBug, NSinusoidal]] = []
+
         if noise_model == "ladybug":
             for _ in range(12):
                 self.phi.append(LadyBug())
         elif noise_model == "sinusoidal":
             for i in range(12):
-                self.phi.append(NSinusoidal(n=sinusoidal_components, s=seed + i if seed > 0 else 0)) # type: ignore
+                self.phi.append(
+                    NSinusoidal(n=sinusoidal_components, s=seed + i if seed > 0 else 0)
+                )
 
         self.t = t0 + 0.0
         """
@@ -138,21 +141,21 @@ class SimpleControlledFixedEnv:
         This variable represents the number of steps the control is delayed. It also represents 
         the number of steps included in the MDP state.
         """
-        self.fixed_error_ctrl_pump = fixed_error[0:4] # type: ignore
+        self.fixed_error_ctrl_pump = fixed_error[0:4]  # type: ignore
         """
         The simulated error (array) for the pump.
 
         This variable represents the simulated error for the pump. It is used to simulate the error 
         for the pump entanglement propagation.
         """
-        self.fixed_error_ctrl_alice = fixed_error[4:8] # type: ignore
+        self.fixed_error_ctrl_alice = fixed_error[4:8]  # type: ignore
         """
         The simulated error (array) for Alice.
 
         This variable represents the simulated error for Alice. It is used to simulate the error 
         for Alice's entanglement propagation.
         """
-        self.fixed_error_ctrl_bob = fixed_error[8:12] # type: ignore
+        self.fixed_error_ctrl_bob = fixed_error[8:12]  # type: ignore
         """
         The simulated error (array) for Bob.
 
@@ -175,7 +178,7 @@ class SimpleControlledFixedEnv:
         
         This variable represents the history of the QBER values as [sample][QBERz, QBERx].
         """
-        self.phi_history: List[np.array]  = []
+        self.phi_history: List[np.array] = []
         """
         The phi history.
         
@@ -195,7 +198,13 @@ class SimpleControlledFixedEnv:
         """
         If the control should be applied in single gate: state @ control_array. This will be done using Alice's gate.
         """
+        self.setting_state_with_time = False
+        """
+        If the state should be returned with the time.
         
+        Note: this will increase the state size by 1. i.e. S = [QBERz, QBERx, time]
+        """
+
         self.cumulative_reward = 0
         self.delta = 0
         self.reward_type = reward_type
@@ -256,11 +265,14 @@ class SimpleControlledFixedEnv:
             else:
                 if self.setting_inverse:
                     pump_polarisation = (
-                        np.linalg.inv(polar_control(self.ctrl_pump_current)) @ pump_polarisation
+                        np.linalg.inv(polar_control(self.ctrl_pump_current))
+                        @ pump_polarisation
                     )
                 else:
                     # print(f"passed: {self.ctrl_pump_current}")
-                    pump_polarisation = polar_control(self.ctrl_pump_current) @ pump_polarisation
+                    pump_polarisation = (
+                        polar_control(self.ctrl_pump_current) @ pump_polarisation
+                    )
 
             # generation of the entangled state
             entangled_state = entangler(pump_polarisation)
@@ -272,7 +284,9 @@ class SimpleControlledFixedEnv:
             )
 
             if self.setting_single:
-                entangled_state_propag = polar_control(self.ctrl_alice_current) @ entangled_state_propag
+                entangled_state_propag = (
+                    polar_control(self.ctrl_alice_current) @ entangled_state_propag
+                )
             else:
                 # *: here is where we do the control with np.kron
                 if self.setting_inverse:
@@ -291,13 +305,13 @@ class SimpleControlledFixedEnv:
                         )
                         @ entangled_state_propag
                     )
-                    
+
             # append the angles for plotting
             self.phi_history.append(phi_move)
             # compute the QBERs
             qbers_current = compute_qber(entangled_state_propag)
             self.qber_history.append(qbers_current)
-                    
+
             reward = 0
             self.cumulative_reward += self.get_reward()
             # *: update control actual values to the current control values
@@ -308,14 +322,17 @@ class SimpleControlledFixedEnv:
                 self.ctrl_pump_current = self.ctrl_pump
                 reward = self.cumulative_reward
                 self.cumulative_reward = 0
-                self.delta = [self.qber_history[-self.latency][0] - qbers_current[0], self.qber_history[-self.latency][1] - qbers_current[1]] # type: ignore
+                self.delta = [
+                    self.qber_history[-self.latency][0] - qbers_current[0],
+                    self.qber_history[-self.latency][1] - qbers_current[1],
+                ]  # type: ignore
 
             # if we exceed max t
             if self.t >= self.max_t:
                 self.done = True
                 break
-        
-        if(self.latency == 0):
+
+        if self.latency == 0:
             _ret_states = self.get_state()
         else:
             _ret_states = self.get_states()
@@ -372,17 +389,35 @@ class SimpleControlledFixedEnv:
 
         Returns:
             np.array(2): first QBERz, then QBERx
+            If setting_state_with_time is True, then the time is also returned.
         """
-        return self.qber_history[-1]
-    
+        _ret_state = self.qber_history[-1]
+        if self.setting_state_with_time:
+            _ret_state = np.concatenate((_ret_state, [self.t]))
+        return _ret_state
+
     def get_states(self):
         """
         Returns the current state of the environment as a numpy array of the two QBERs.
 
         Returns:
             List[np.array(2)]: first QBERz, then QBERx
+            If setting_state_with_time is True, then the time is also returned.
         """
-        return self.qber_history[-self.latency:]
+        qbers = self.qber_history[-self.latency :]
+        _ret = []
+        for i, qber_pair in enumerate(qbers):
+            if self.setting_state_with_time:
+                qber_pair = np.concatenate(
+                    (
+                        qber_pair,
+                        [self.t - self.delta_t * self.latency + i * self.delta_t],
+                    )
+                )
+                _ret.append(qber_pair)
+            else:
+                _ret.append(qber_pair)
+        return _ret
 
     def get_reward(self):
         """
@@ -394,11 +429,11 @@ class SimpleControlledFixedEnv:
         qber = self.qber_history[-1]
 
         if self.reward_type == "negative":
-            reward = -qber[0] -qber[1]
+            reward = -qber[0] - qber[1]
         elif self.reward_type == "inverse":
-            reward = 1/(qber[0] + qber[1] + 0.1)
+            reward = 1 / (qber[0] + qber[1] + 0.1)
         elif self.reward_type == "threshold":
-            reward = 0 if qber[0] + qber[1] < 0.1 else -qber[0] -qber[1]
+            reward = 0 if qber[0] + qber[1] < 0.1 else -qber[0] - qber[1]
 
         return reward
 
@@ -414,9 +449,9 @@ class SimpleControlledFixedEnv:
 
     def get_info(self):
         """
-        Returns the value of the 't' attribute.
+        Returns the value of the current time.
 
         Returns:
-            The value of the 't' attribute.
+            The value of the current time.
         """
         return self.t
