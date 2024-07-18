@@ -1,0 +1,32 @@
+Parameter,Value
+uid,25430457-ab60-41ca-a798-42f21f18ecf1
+date_completed,2024-07-18 09:38:13.179566
+algorithm,PPO with continous action gaussian policy
+total_episodes,300
+seed,<environment.models.simple_control_fixed.SimpleControlledFixedEnv object at 0x7f1e139bb5e0>
+gamma,0.99
+lambda,0.99
+num_actions,2
+num_states,3
+HIDDEN_LAYER_SIZES,"(256, 256)"
+target_kl,0.01
+train_policy_iterations,180
+train_value_iterations,180
+max_env_steps,100
+latency,0
+policy_learning_rate,0.0003
+value_function_learning_rate,0.001
+clip_ration,0.1
+env_reward_type,negative
+env.delta_t,0.1
+env.max_t,10.0
+env_type,SimpleControlledFixedEnv
+env.fixed_errors_flags,"[True, True, True, True, False, False, True, True, True, True, True, True]"
+env.fixed_error_ctrl_pump,"[0, 0, 0, 0]"
+env.fixed_error_ctrl_alice,"[0, 0, 0, 0]"
+env.fixed_error_ctrl_bob,"[0, 0, 0, 0]"
+total_training_time,133.89380478858948
+avg_time_per_ep,133.89380478858948
+baseline_reward,-25.345627705123267
+convergence_reward,-31.051422279816165
+note,curriculum: restrict QBER to X then Z then both

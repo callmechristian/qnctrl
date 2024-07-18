@@ -68,6 +68,8 @@ class WeatherControlledFixedEnv:
         latency: int = 3,
         fixed_error: np.array = np.zeros(12),
         fibre_segments: int = 2,
+        interpolate_data: bool = False,
+        interpolation_values: int = 30
     ):
         """
         Initializes an instance of SimpleEnv.
@@ -82,7 +84,10 @@ class WeatherControlledFixedEnv:
         # the polarization vector of the pump
         self.H = 1 / np.sqrt(2) * np.matrix([[1], [1]]) # pylint: disable=invalid-name
         
-        self.data = load_historical_weather_data()
+        if interpolate_data:
+            self.data = load_historical_weather_data(interpolate=True, interpolation_values=interpolation_values)
+        else:
+            self.data = load_historical_weather_data()
 
         self.phi = [WindModel(self.data) for _ in range(fibre_segments)]
         

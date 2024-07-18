@@ -12,7 +12,7 @@ class WindModel:
         self.index = 0
         self.wind_speed = data["wind_speed"]
         self.wind_direction = data["wind_direction"]
-    
+
     def reset(self):
         self.index = 0
 
@@ -25,13 +25,17 @@ class WindModel:
             * self.wind_speed[self.index] ** 2
             * fibre_cable.drag_coefficient
         )  # N
-        
+
         self.next_sample()
-        
+
         # moment of force will be according to incident wind
         angle_in_rad = self.wind_direction[self.index]
+        alpha = np.pi / 2 - angle_in_rad
         force_rot_dir = np.matrix(
-            [[np.cos()],[np.sin() * np.exp(1.0j * angle_in_rad)]]
+            [
+                [np.cos(alpha), np.sin(alpha)],
+                [-np.sin(alpha), np.cos(alpha)],
+            ]
         )
         return (polarisation_from_force(F, fibre_cable) @ force_rot_dir, F)
 
