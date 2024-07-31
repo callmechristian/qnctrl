@@ -24,6 +24,7 @@ This module imports the following packages:
 
 from typing import List
 import numpy as np
+from scipy.interpolate import interp1d  # type: ignore
 
 from ..core import polar_control, entangler, compute_qber, FibreLink, polarisation_from_force
 from ..weather.wind_model import WindModel
@@ -69,7 +70,9 @@ class WeatherControlledFixedEnv:
         fixed_error: np.array = np.zeros(12),
         fibre_segments: int = 2,
         interpolate_data: bool = False,
-        interpolation_values: int = 30
+        interpolation_values: int = 30,
+        output_interp: bool = False,
+        output_interp_values: int = 30
     ):
         """
         Initializes an instance of SimpleEnv.
@@ -88,6 +91,16 @@ class WeatherControlledFixedEnv:
             self.data = load_historical_weather_data(interpolate=True, interpolation_values=interpolation_values)
         else:
             self.data = load_historical_weather_data()
+            
+        self.output_interp = output_interp
+        """
+        The output interpolation flag.
+        """
+        
+        self.output_interp_values = output_interp_values
+        """
+        The number of interpolation values between each point.
+        """
 
         self.phi = [WindModel(self.data) for _ in range(fibre_segments)]
         
@@ -310,6 +323,23 @@ class WeatherControlledFixedEnv:
         Returns:
             numpy.ndarray: The history of QBER values.
         """
+        if(self.output_interp):
+            l = len(self.qber_history)
+            z = [self.qber_history[i][0] for i in range(l)]
+            x = [self.qber_history[i][1] for i in range(l)]
+            
+            nl = np.arange(l)
+
+            interpz = interp1d(nl, z, kind="cubic", axis=0)
+            interpx = interp1d(nl, x, kind="cubic", axis=0)
+
+            nl_new = np.linspace(0, l - 1, (l - 1) * self.output_interp_values + 1)
+
+            _z = interpz(nl_new)
+            _x = interpx(nl_new)
+            
+            return [np.array(_z), np.array(_x)]
+            
         return np.array(self.qber_history)
 
     # def get_phi(self):
