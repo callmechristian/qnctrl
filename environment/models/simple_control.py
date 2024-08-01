@@ -166,7 +166,7 @@ class SimpleControlledEnv:
             # compute the move the angles based on the motion model
             phi_move = []
             for i in range(12):
-                phi_move.append(self.phi[i].move(self.t))
+                phi_move.append(self.phi[i].sample(self.t))
 
             # rotation of the pump in the source -- +
             # *: here is where we do the control with @gate

@@ -70,6 +70,7 @@ class SimpleControlledFixedEnv:
         seed: int = 0,
         noise_model: str = "ladybug",
         reward_type: str = "negative",
+        additive_control: bool = False
     ):
         """
         Initializes an instance of SimpleEnv.
@@ -204,6 +205,7 @@ class SimpleControlledFixedEnv:
         
         Note: this will increase the state size by 1. i.e. S = [QBERz, QBERx, time]
         """
+        self.setting_ctrl_additive = additive_control
 
         self.cumulative_reward = 0
         self.delta = 0
@@ -316,10 +318,14 @@ class SimpleControlledFixedEnv:
             self.cumulative_reward += self.get_reward()
             # *: update control actual values to the current control values
             if ctrl_latency_counter == self.latency:
-                self.ctrl_alice_current = self.ctrl_alice
-                self.ctrl_bob_current = self.ctrl_bob
-                # print(f"ctrl pump current assigned: {self.ctrl_pump}")
-                self.ctrl_pump_current = self.ctrl_pump
+                if self.setting_ctrl_additive:
+                    self.ctrl_alice_current += self.ctrl_alice
+                    self.ctrl_bob_current += self.ctrl_bob
+                    self.ctrl_pump_current += self.ctrl_pump
+                else:
+                    self.ctrl_alice_current = self.ctrl_alice
+                    self.ctrl_bob_current = self.ctrl_bob
+                    self.ctrl_pump_current = self.ctrl_pump
                 reward = self.cumulative_reward
                 self.cumulative_reward = 0
                 self.delta = [
