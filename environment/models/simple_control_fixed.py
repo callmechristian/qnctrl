@@ -440,6 +440,10 @@ class SimpleControlledFixedEnv:
             reward = 1 / (qber[0] + qber[1] + 0.1)
         elif self.reward_type == "threshold":
             reward = 0 if qber[0] + qber[1] < 0.1 else -qber[0] - qber[1]
+        elif self.reward_type == "x":
+            reward = -qber[1]
+        elif self.reward_type == "z":
+            reward = -qber[0]
 
         return reward
 
