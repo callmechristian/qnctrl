@@ -28,6 +28,7 @@ import numpy as np
 from ..core import polar_control, entangler, compute_qber
 from ..random_motion import VariableLadyBug
 
+
 class VariedControlledFixedEnv:
     """
     A class that simulates a controlled environment for quantum entanglement propagation.
@@ -64,7 +65,7 @@ class VariedControlledFixedEnv:
         t0: float = 0,
         max_t: float = 0.2,
         latency: int = 3,
-        fixed_error: np.array = np.zeros(12),
+        fixed_error: np.array = np.zeros(12), # type: ignore
     ):
         """
         Initializes an instance of SimpleEnv.
@@ -77,7 +78,7 @@ class VariedControlledFixedEnv:
             None
         """
         # the polarization vector of the pump
-        self.H = 1 / np.sqrt(2) * np.matrix([[1], [1]]) # pylint: disable=invalid-name
+        self.H = 1 / np.sqrt(2) * np.matrix([[1], [1]])  # pylint: disable=invalid-name
 
         self.phi = []
         for _ in range(12):
@@ -129,21 +130,21 @@ class VariedControlledFixedEnv:
         This variable represents the number of steps the control is delayed. It also represents 
         the number of steps included in the MDP state.
         """
-        self.fixed_error_ctrl_pump = fixed_error[0:4] # type: ignore
+        self.fixed_error_ctrl_pump = fixed_error[0:4]  # type: ignore
         """
         The simulated error (array) for the pump.
 
         This variable represents the simulated error for the pump. It is used to simulate the error 
         for the pump entanglement propagation.
         """
-        self.fixed_error_ctrl_alice = fixed_error[4:8] # type: ignore
+        self.fixed_error_ctrl_alice = fixed_error[4:8]  # type: ignore
         """
         The simulated error (array) for Alice.
 
         This variable represents the simulated error for Alice. It is used to simulate the error 
         for Alice's entanglement propagation.
         """
-        self.fixed_error_ctrl_bob = fixed_error[8:12] # type: ignore
+        self.fixed_error_ctrl_bob = fixed_error[8:12]  # type: ignore
         """
         The simulated error (array) for Bob.
 
@@ -166,7 +167,7 @@ class VariedControlledFixedEnv:
         
         This variable represents the history of the QBER values.
         """
-        self.phi_history: List[np.array]  = []
+        self.phi_history: List[np.array] = [] # type: ignore
         """
         The phi history.
         
@@ -179,9 +180,9 @@ class VariedControlledFixedEnv:
 
     def step(
         self,
-        a_pump: np.array = np.zeros(4),
-        a_alice: np.array = np.zeros(4),
-        a_bob: np.array = np.zeros(4),
+        a_pump: np.array = np.zeros(4), # type: ignore
+        a_alice: np.array = np.zeros(4), # type: ignore
+        a_bob: np.array = np.zeros(4), # type: ignore
     ):
         """
         Perform a single step in the environment.
@@ -221,7 +222,7 @@ class VariedControlledFixedEnv:
                     phi_move.append(_errs[i])
                 else:
                     # otherwise we append the random error
-                    phi_move.append(self.phi[i].move(self.t))
+                    phi_move.append(self.phi[i].sample(self.t))
 
             # rotation of the pump in the source -- +
             # *: here is where we do the control with @gate

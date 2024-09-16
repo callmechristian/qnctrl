@@ -29,6 +29,7 @@ from ..core import polar_control, entangler, compute_qber
 from ..random_motion import NSinusoidal
 from ..control import sinusoidal_control
 
+
 class SinusoidalControlledFixedEnv:
     """
     A class that simulates a controlled environment for quantum entanglement propagation.
@@ -65,7 +66,7 @@ class SinusoidalControlledFixedEnv:
         t0: float = 0,
         max_t: float = 1440,
         latency: int = 3,
-        fixed_error: np.array = np.zeros(12),
+        fixed_error: np.array = np.zeros(12), # type: ignore
         sinusoidal_components: int = 4,
         seed: int = 0,
     ):
@@ -80,7 +81,7 @@ class SinusoidalControlledFixedEnv:
             None
         """
         # the polarization vector of the pump
-        self.H = 1 / np.sqrt(2) * np.matrix([[1], [1]]) # pylint: disable=invalid-name
+        self.H = 1 / np.sqrt(2) * np.matrix([[1], [1]])  # pylint: disable=invalid-name
 
         self.seed = seed
 
@@ -138,21 +139,21 @@ class SinusoidalControlledFixedEnv:
         This variable represents the number of steps the control is delayed. It also represents 
         the number of steps included in the MDP state.
         """
-        self.fixed_error_ctrl_pump = fixed_error[0:4] # type: ignore
+        self.fixed_error_ctrl_pump = fixed_error[0:4]  # type: ignore
         """
         The simulated error (array) for the pump.
 
         This variable represents the simulated error for the pump. It is used to simulate the error 
         for the pump entanglement propagation.
         """
-        self.fixed_error_ctrl_alice = fixed_error[4:8] # type: ignore
+        self.fixed_error_ctrl_alice = fixed_error[4:8]  # type: ignore
         """
         The simulated error (array) for Alice.
 
         This variable represents the simulated error for Alice. It is used to simulate the error 
         for Alice's entanglement propagation.
         """
-        self.fixed_error_ctrl_bob = fixed_error[8:12] # type: ignore
+        self.fixed_error_ctrl_bob = fixed_error[8:12]  # type: ignore
         """
         The simulated error (array) for Bob.
 
@@ -175,7 +176,7 @@ class SinusoidalControlledFixedEnv:
         
         This variable represents the history of the QBER values as [sample][QBERz, QBERx].
         """
-        self.phi_history: List[np.array]  = []
+        self.phi_history: List[np.array] = [] # type: ignore
         """
         The phi history.
         
@@ -193,20 +194,21 @@ class SinusoidalControlledFixedEnv:
         """
         self.setting_single = False
         """
-        If the control should be applied in single gate: state @ control_array. This will be done using Alice's gate.
+        If the control should be applied in single gate: state @ control_array.
+        This will be done using Alice's gate.
         """
         self.sinusoidal_components = sinusoidal_components
         """
         The number of sinusoidal components.
         """
-        
+
         self.reward_ctr = 0.0
 
     def step(
         self,
-        a_pump: List[np.array] = [np.zeros(4) for _ in range(4)],
-        a_alice: List[np.array] =  [np.zeros(4) for _ in range(4)],
-        a_bob: List[np.array] = [np.zeros(4) for _ in range(4)],
+        a_pump: List[np.array] = [np.zeros(4) for _ in range(4)], # type: ignore
+        a_alice: List[np.array] = [np.zeros(4) for _ in range(4)], # type: ignore
+        a_bob: List[np.array] = [np.zeros(4) for _ in range(4)], # type: ignore
     ):
         """
         Perform a single step in the environment.
@@ -227,7 +229,7 @@ class SinusoidalControlledFixedEnv:
         self.ctrl_pump = sinusoidal_control(self.t, a_pump)
         self.ctrl_alice = sinusoidal_control(self.t, a_alice)
         self.ctrl_bob = sinusoidal_control(self.t, a_bob)
-        
+
         # print(f"p: {self.ctrl_pump} a: {self.ctrl_alice} b: {self.ctrl_bob}")
 
         # *: assume our MDP state is the size of the latency in control
@@ -261,11 +263,14 @@ class SinusoidalControlledFixedEnv:
             else:
                 if self.setting_inverse:
                     pump_polarisation = (
-                        np.linalg.inv(polar_control(self.ctrl_pump_current)) @ pump_polarisation
+                        np.linalg.inv(polar_control(self.ctrl_pump_current))
+                        @ pump_polarisation
                     )
                 else:
                     # print(f"passed: {self.ctrl_pump_current}")
-                    pump_polarisation = polar_control(self.ctrl_pump_current) @ pump_polarisation
+                    pump_polarisation = (
+                        polar_control(self.ctrl_pump_current) @ pump_polarisation
+                    )
 
             # generation of the entangled state
             entangled_state = entangler(pump_polarisation)
@@ -277,7 +282,9 @@ class SinusoidalControlledFixedEnv:
             )
 
             if self.setting_single:
-                entangled_state_propag = polar_control(self.ctrl_alice_current) @ entangled_state_propag
+                entangled_state_propag = (
+                    polar_control(self.ctrl_alice_current) @ entangled_state_propag
+                )
             else:
                 # *: here is where we do the control with np.kron
                 if self.setting_inverse:
@@ -311,7 +318,7 @@ class SinusoidalControlledFixedEnv:
                 self.ctrl_bob_current = self.ctrl_bob
                 # print(f"ctrl pump current assigned: {self.ctrl_pump}")
                 self.ctrl_pump_current = self.ctrl_pump
-                
+
                 # compute reward
                 reward = self.reward_ctr
                 self.reward_ctr = 0
@@ -375,15 +382,16 @@ class SinusoidalControlledFixedEnv:
             np.array(2): first QBERz, then QBERx
         """
         return self.qber_history[-1]
-    
+
     def get_states(self):
         """
-        Returns the last states of the environment as a numpy array of the two QBERs of length LATENCY.
+        Returns the last states of the environment as a numpy array of the two
+        QBERs of length LATENCY.
 
         Returns:
             [np.array(2), ...]: first QBERz, then QBERx
         """
-        return self.qber_history[-self.latency:]
+        return self.qber_history[-self.latency :]
 
     def get_reward(self):
         """
@@ -403,8 +411,8 @@ class SinusoidalControlledFixedEnv:
         # bonus_zx = 0
         # if qber[0] < 0.05 and qber[1] < 0.05:
         #     bonus_zx = 0.1
-        
-        reward = -qber[0] -qber[1]
+
+        reward = -qber[0] - qber[1]
         # reward = bonus_zx
         return reward
 

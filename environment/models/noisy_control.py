@@ -144,13 +144,13 @@ class SimpleControlledEnv:
         self.done = False
 
         self.qber_history: List[float] = []
-        self.phi_history: List[np.array] = []
+        self.phi_history: List[np.array] = [] # type: ignore
 
     def step(
         self,
-        a_pump: np.array = np.zeros(4),
-        a_alice: np.array = np.zeros(4),
-        a_bob: np.array = np.zeros(4),
+        a_pump: np.array = np.zeros(4), # type: ignore
+        a_alice: np.array = np.zeros(4), # type: ignore
+        a_bob: np.array = np.zeros(4), # type: ignore
     ):
         """
         Performs a simulation step.
@@ -180,7 +180,7 @@ class SimpleControlledEnv:
             # compute the move the angles based on the motion model
             phi_move = []
             for i in range(12):
-                phi_move.append(self.phi[i].move(self.t))
+                phi_move.append(self.phi[i].sample(self.t))
 
             # rotation of the pump in the source -- +
             # ?: here is where we do the control with @gate

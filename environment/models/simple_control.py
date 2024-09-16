@@ -12,11 +12,13 @@ The module uses numpy for numerical operations and typing for type annotations.
 Classes:
     SimpleControlledEnv: A class for simulating a simple controlled environment.
 """
+
 from typing import List
 import numpy as np
 
 from ..core import polar_control, entangler, compute_qber
 from ..random_motion import LadyBug
+
 
 class SimpleControlledEnv:
     """
@@ -76,13 +78,13 @@ class SimpleControlledEnv:
             None
         """
         # the polarization vector of the pump
-        self.H = 1/np.sqrt(2)*np.matrix([[1],[1]]) # pylint: disable=invalid-name
+        self.H = 1 / np.sqrt(2) * np.matrix([[1], [1]])  # pylint: disable=invalid-name
 
         self.phi = []
-        for _ in range (12):
+        for _ in range(12):
             self.phi.append(LadyBug())
 
-        self.t = t0 + 0.
+        self.t = t0 + 0.0
         """
         The initial time value.
 
@@ -94,7 +96,7 @@ class SimpleControlledEnv:
 
         This variable represents the maximum simulation time.
         """
-        self.delta_t = 0.0001 # speed of the error fluctuation
+        self.delta_t = 0.0001  # speed of the error fluctuation
         """
         The speed of the error fluctuation.
 
@@ -133,15 +135,18 @@ class SimpleControlledEnv:
         self.ctrl_bob_current = np.zeros(4)
         self.ctrl_pump_current = np.zeros(4)
 
-
         self.done = False
 
         self.qber_history: List[float] = []
 
-        self.phi_history: List[np.array] = []
+        self.phi_history: List[np.array] = []  # type: ignore
 
-    def step(self, a_pump: np.array = np.zeros(4), a_alice: np.array = np.zeros(4),
-             a_bob: np.array = np.zeros(4)):
+    def step(
+        self,
+        a_pump: np.array = np.zeros(4), # type: ignore
+        a_alice: np.array = np.zeros(4), # type: ignore
+        a_bob: np.array = np.zeros(4), # type: ignore
+    ):
         """
         Perform a single step in the environment.
 
@@ -157,7 +162,7 @@ class SimpleControlledEnv:
         self.ctrl_pump = a_pump
         self.ctrl_alice = a_alice
         self.ctrl_bob = a_bob
-   
+
         # *: assume our MDP state is the size of the latency in control
         for ctrl_latency_counter in range(self.latency + 1):
             # update current time step
@@ -171,18 +176,27 @@ class SimpleControlledEnv:
             # rotation of the pump in the source -- +
             # *: here is where we do the control with @gate
             pump_polarisation = polar_control(phi_move[0:4]) @ self.H
-            pump_polarisation = polar_control(self.ctrl_pump_current) @ pump_polarisation
+            pump_polarisation = (
+                polar_control(self.ctrl_pump_current) @ pump_polarisation
+            )
 
             # generation of the entangled state
             entangled_state = entangler(pump_polarisation)
             # rotation of the entangled state during the propagation --
             # gives entangled state at next time step
-            entangled_state_propagation = np.kron(polar_control(phi_move[4:8]),
-                                        polar_control(phi_move[8:12])) @ entangled_state
+            entangled_state_propagation = (
+                np.kron(polar_control(phi_move[4:8]), polar_control(phi_move[8:12]))
+                @ entangled_state
+            )
 
             # *: here is where we do the control with np.kron
-            entangled_state_propagation = np.kron(polar_control(self.ctrl_alice_current),
-            polar_control(self.ctrl_bob_current)) @ entangled_state_propagation
+            entangled_state_propagation = (
+                np.kron(
+                    polar_control(self.ctrl_alice_current),
+                    polar_control(self.ctrl_bob_current),
+                )
+                @ entangled_state_propagation
+            )
             # *: update control actual values to the current control values
             if ctrl_latency_counter == self.latency:
                 self.ctrl_alice_current = self.ctrl_alice
@@ -205,16 +219,16 @@ class SimpleControlledEnv:
     def reset(self):
         """
         Resets the environment to its initial state.
-        
+
         This method resets the time `t` to 0, sets the `done` flag to False,
         clears the `qber_history` and `phi_history` lists, and calls the `step`
         method to perform an initial step. Finally, it returns the current state
         of the environment.
-        
+
         Returns:
             state (object): The current state of the environment.
         """
-        self.t = 0.
+        self.t = 0.0
         self.done = False
         self.qber_history = []
         self.phi_history = []
@@ -224,7 +238,7 @@ class SimpleControlledEnv:
     def get_qber(self):
         """
         Returns the history of QBER (Quantum Bit Error Rate) as a numpy array.
-        
+
         Returns:
             numpy.ndarray: The history of QBER values.
         """
@@ -272,7 +286,7 @@ class SimpleControlledEnv:
     def get_info(self):
         """
         Returns the value of the 't' attribute.
-        
+
         Returns:
             The value of the 't' attribute.
         """

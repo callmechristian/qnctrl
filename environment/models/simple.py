@@ -19,6 +19,7 @@ import numpy as np
 from ..core import polar_control, entangler, compute_qber
 from ..random_motion import LadyBug
 
+
 class SimpleEnv:
     """
     A class representing a simple environment for quantum control simulations.
@@ -37,26 +38,26 @@ class SimpleEnv:
         Returns:
             None
         """
-        self.H = 1/np.sqrt(2)*np.matrix([[1],[1]]) # pylint: disable=invalid-name
+        self.H = 1 / np.sqrt(2) * np.matrix([[1], [1]])  # pylint: disable=invalid-name
 
         self.phi = []
-        for _ in range (12):
+        for _ in range(12):
             self.phi.append(LadyBug())
 
-        self.t = t0 + 0.
+        self.t = t0 + 0.0
         """
         The initial time value.
 
         This variable represents the starting time for the simulation.
         """
-        self.max_t = max_t # ! will be updated when simulate is called
+        self.max_t = max_t  # ! will be updated when simulate is called
         self.initial_max_t = max_t
         """
         The maximum simulation time horizon.
 
         This variable represents the maximum simulation time.
         """
-        self.delta_t = 0.0001 # speed of the error fluctuation
+        self.delta_t = 0.0001  # speed of the error fluctuation
         """
         The speed of the error fluctuation.
 
@@ -64,7 +65,7 @@ class SimpleEnv:
         """
 
         self.qbers_history: List[float] = []
-        self.phi_history: List[np.array] = []
+        self.phi_history: List[np.array] = []  # type: ignore
         self.t_history: List[float] = []
 
     def simulate(self, reset=True):
@@ -88,13 +89,15 @@ class SimpleEnv:
 
             # rotation of the pump in the source -- +
             # //: here is where we do the control with @gate
-            pump_polarisation = polar_control(phi_move[0:4])@self.H
+            pump_polarisation = polar_control(phi_move[0:4]) @ self.H
             # generation of the entangled state
             entangled_state = entangler(pump_polarisation)
             # rotation of the entangled state during the propagation --
             # gives entangled state at next time point
-            entangled_state_propagation = np.kron(polar_control(phi_move[4:8]),
-                                        polar_control(phi_move[8:12]))@entangled_state
+            entangled_state_propagation = (
+                np.kron(polar_control(phi_move[4:8]), polar_control(phi_move[8:12]))
+                @ entangled_state
+            )
             # //: here is where we do the control with np.kron
             # append the angles for plotting
             self.phi_history.append(phi_move)
@@ -110,7 +113,7 @@ class SimpleEnv:
     def get_qber(self):
         """
         Returns the history of QBER (Quantum Bit Error Rate) as a numpy array.
-        
+
         Returns:
             numpy.ndarray: The history of QBER values.
         """
@@ -132,7 +135,7 @@ class SimpleEnv:
         Returns:
             None
         """
-        self.t = 0.
+        self.t = 0.0
         self.t_history = []
         self.qbers_history = []
         self.phi_history = []

@@ -41,7 +41,7 @@ class VariableLadyBug:
             seed(s)
         self.params_x = [gauss(0.0, 1.0) for _ in range(8)]
 
-    def move(self, t: float):
+    def sample(self, t: float):
         """
         Calculates the ladybug model's movement at time t.
 

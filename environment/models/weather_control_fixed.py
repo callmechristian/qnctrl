@@ -26,9 +26,14 @@ from typing import List
 import numpy as np
 from scipy.interpolate import interp1d  # type: ignore
 
-from ..core import polar_control, entangler, compute_qber, FibreLink, polarisation_from_force
-from ..weather.wind_model import WindModel
 from data.utils.data_processing import load_historical_weather_data
+from ..core import (
+    polar_control,
+    entangler,
+    compute_qber,
+    FibreLink
+)
+from ..weather.wind_model import WindModel
 
 class WeatherControlledFixedEnv:
     """
@@ -67,12 +72,11 @@ class WeatherControlledFixedEnv:
         max_steps: int = 400,
         step_time: float = 60,
         latency: int = 3,
-        fixed_error: np.array = np.zeros(12),
         fibre_segments: int = 2,
         interpolate_data: bool = False,
         interpolation_values: int = 30,
         output_interp: bool = False,
-        output_interp_values: int = 30
+        output_interp_values: int = 30,
     ):
         """
         Initializes an instance of SimpleEnv.
@@ -85,25 +89,27 @@ class WeatherControlledFixedEnv:
             None
         """
         # the polarization vector of the pump
-        self.H = 1 / np.sqrt(2) * np.matrix([[1], [1]]) # pylint: disable=invalid-name
-        
+        self.H = 1 / np.sqrt(2) * np.matrix([[1], [1]])  # pylint: disable=invalid-name
+
         if interpolate_data:
-            self.data = load_historical_weather_data(interpolate=True, interpolation_values=interpolation_values)
+            self.data = load_historical_weather_data(
+                interpolate=True, interpolation_values=interpolation_values
+            )
         else:
             self.data = load_historical_weather_data()
-            
+
         self.output_interp = output_interp
         """
         The output interpolation flag.
         """
-        
+
         self.output_interp_values = output_interp_values
         """
         The number of interpolation values between each point.
         """
 
         self.phi = [WindModel(self.data) for _ in range(fibre_segments)]
-        
+
         self.t = t0 + 0.0
         """
         The initial time value.
@@ -128,7 +134,7 @@ class WeatherControlledFixedEnv:
         """
         The step count.
         """
-        self.total_time : float = 0
+        self.total_time: float = 0
         """
         The total time for the simulation, computed from the current step count.
         """
@@ -177,7 +183,7 @@ class WeatherControlledFixedEnv:
         
         This variable represents the history of the QBER values.
         """
-        self.phi_history: List[np.array]  = []
+        self.phi_history: List[np.array] = []  # type: ignore
         """
         The phi history.
         
@@ -187,16 +193,20 @@ class WeatherControlledFixedEnv:
         """
         The done flag.
         """
-        self.Fs: List[List[float]] = [[] for _ in range(fibre_segments)]
+        self.Fs: List[List[float]] = [[] for _ in range(fibre_segments)]  # pylint: disable=invalid-name
         """
         Stores compute Force applied on fibre segments
+        """
+        self.qbers_current = np.zeros(2)
+        """
+        Stores the current QBER values.
         """
 
     def step(
         self,
-        a_pump: np.array = np.zeros(4),
-        a_alice: np.array = np.zeros(4),
-        a_bob: np.array = np.zeros(4),
+        a_pump: np.array = np.zeros(4),  # type: ignore
+        a_alice: np.array = np.zeros(4),  # type: ignore
+        a_bob: np.array = np.zeros(4),  # type: ignore
     ):
         """
         Perform a single step in the environment.
@@ -235,12 +245,12 @@ class WeatherControlledFixedEnv:
                     rot_mat, f = self.phi[i].compute_sample(link)
                     phi_move.append(rot_mat)
                     self.Fs[i].append(f)
-           
+
             # rotation of the pump in the source -- +
             # *: here is where we do the control with @gate
             # ? but this error does not come from the propagation, but from the source generation?
             # pump_polarisation = polar_control(phi_move[0:4]) @ self.H
-            pump_polarisation = phi_move[0] @ self.H # ^^^
+            pump_polarisation = phi_move[0] @ self.H  # ^^^
             pump_polarisation = (
                 polar_control(self.ctrl_pump_current) @ pump_polarisation
             )
@@ -257,7 +267,7 @@ class WeatherControlledFixedEnv:
             # print("States after phi_move")
             for i, phi in enumerate(phi_move):
                 if i < len(phi_move) - 1:
-                    kron = np.kron(phi, phi_move[i+1])
+                    kron = np.kron(phi, phi_move[i + 1])
                     entangled_state_propag = kron @ entangled_state_propag
 
             # *: here is where we do the control with np.kron
@@ -323,23 +333,23 @@ class WeatherControlledFixedEnv:
         Returns:
             numpy.ndarray: The history of QBER values.
         """
-        if(self.output_interp):
-            l = len(self.qber_history)
-            z = [self.qber_history[i][0] for i in range(l)]
-            x = [self.qber_history[i][1] for i in range(l)]
-            
-            nl = np.arange(l)
+        if self.output_interp:
+            le = len(self.qber_history)
+            z = [self.qber_history[i][0] for i in range(le)]
+            x = [self.qber_history[i][1] for i in range(le)]
+
+            nl = np.arange(le)
 
             interpz = interp1d(nl, z, kind="cubic", axis=0)
             interpx = interp1d(nl, x, kind="cubic", axis=0)
 
-            nl_new = np.linspace(0, l - 1, (l - 1) * self.output_interp_values + 1)
+            nl_new = np.linspace(0, le - 1, (le - 1) * self.output_interp_values + 1)
 
             _z = interpz(nl_new)
             _x = interpx(nl_new)
-            
+
             return [np.array(_z), np.array(_x)]
-            
+
         return np.array(self.qber_history)
 
     # def get_phi(self):
@@ -393,16 +403,16 @@ class WeatherControlledFixedEnv:
     def get_qber_x_current(self):
         """
         Returns the current QBERx value.
-        
+
         Returns:
             The current QBERx value.
         """
         return self.qbers_current[1]
-    
+
     def get_qber_z_current(self):
         """
         Returns the current QBERz value.
-        
+
         Returns:
             The current QBERz value.
         """

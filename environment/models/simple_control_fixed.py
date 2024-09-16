@@ -65,12 +65,12 @@ class SimpleControlledFixedEnv:
         t0: float = 0,
         max_t: float = 1440,
         latency: int = 3,
-        fixed_error: np.array = np.zeros(12),
+        fixed_error: np.array = np.zeros(12), # type: ignore
         sinusoidal_components: int = 1,
         seed: int = 0,
         noise_model: str = "ladybug",
         reward_type: str = "negative",
-        additive_control: bool = False
+        additive_control: bool = False,
     ):
         """
         Initializes an instance of SimpleEnv.
@@ -179,7 +179,7 @@ class SimpleControlledFixedEnv:
         
         This variable represents the history of the QBER values as [sample][QBERz, QBERx].
         """
-        self.phi_history: List[np.array] = []
+        self.phi_history: List[np.array] = []  # type: ignore
         """
         The phi history.
         
@@ -197,7 +197,8 @@ class SimpleControlledFixedEnv:
         """
         self.setting_single = False
         """
-        If the control should be applied in single gate: state @ control_array. This will be done using Alice's gate.
+        If the control should be applied in single gate: state @ control_array.
+        This will be done using Alice's gate.
         """
         self.setting_state_with_time = False
         """
@@ -213,9 +214,9 @@ class SimpleControlledFixedEnv:
 
     def step(
         self,
-        a_pump: np.array = np.zeros(4),
-        a_alice: np.array = np.zeros(4),
-        a_bob: np.array = np.zeros(4),
+        a_pump: np.array = np.zeros(4),  # type: ignore
+        a_alice: np.array = np.zeros(4),  # type: ignore
+        a_bob: np.array = np.zeros(4),  # type: ignore
     ):
         """
         Perform a single step in the environment.

@@ -1,3 +1,15 @@
+"""
+This module defines the NSinusoidal class for simulating N-Sinusoidal random motion.
+
+Classes:
+- NSinusoidal: Represents a N-Sinusoidal random motion model object.
+
+NSinusoidal Methods:
+- __init__(self, s: int = 0, n: int = 4, random: bool = False,
+max_n: int = 10): Initializes a NSinusoidal object.
+- sample(self, t: float): Calculates the model's movement at time t.
+"""
+
 from random import gauss, seed, randint
 from numpy import sin, cos
 
@@ -25,6 +37,8 @@ class NSinusoidal:
         Args:
             s (int): Seed value for random number generation. Default is 0.
             n (int): Number of sinusoidal signals. Default is 4.
+            random (bool): If True, assigns a random value to n regardless of the input. Default is False.
+            max_n (int): Maximum value for n when random is True. Default is 10.
         """
         if s > 0:
             seed(s)

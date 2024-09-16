@@ -1,11 +1,11 @@
 """
 This module provides a class for simulating the random motion of a ladybug.
 
-The LadyBug class simulates the random motion of a ladybug based on a set of parameters 
-that are randomly generated using a Gaussian distribution. The motion is calculated 
+The LadyBug class simulates the random motion of a ladybug based on a set of parameters
+that are randomly generated using a Gaussian distribution. The motion is calculated
 based on the current time and these parameters.
 
-The module uses the random and numpy libraries for generating random numbers and 
+The module uses the random and numpy libraries for generating random numbers and
 performing mathematical operations respectively.
 
 Classes:
@@ -37,7 +37,7 @@ class LadyBug:
         """
         if s > 0:
             seed(s)
-        
+
         self.params_amplitude = [gauss(0.0, 0.01) for u in range(4)]
         self.params_pulsation = [gauss(0.01, 0.1) for u in range(4)]
 

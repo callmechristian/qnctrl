@@ -2,7 +2,7 @@
 This module provides a function to load historical weather data from a CSV file.
 """
 from random import seed, randrange
-import pandas as pd
+import pandas as pd # type: ignore
 
 class WeatherModel:
     """
@@ -25,15 +25,12 @@ class WeatherModel:
         if s > 0:
             seed(s)
         self.start_point = randrange(0, 240)
-        self.data = select_samples(load_historical_weather_data(), -1, self.start_point)
+        self.data = self.select_samples(-1, self.start_point)
         self.current_index = self.start_point
 
-    def move(self, t: float):
+    def sample(self):
         """
         Return the next sample from the weather data.
-
-        Args:
-            t (float): Time value.
 
         Returns:
             float: The calculated movement of the ladybug model at time t.
