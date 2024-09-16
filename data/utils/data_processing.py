@@ -82,7 +82,8 @@ def interpolate_data(
         data (pandas.DataFrame): The weather data.
         interpolation_values (int): The number of values to interpolate between
         each original value.
-        interpolation_type (str): The type of interpolation to use. Options: 'cubic' -- TBI: 'linear', 'nearest', 'zero', 'slinear', 'quadratic'
+        interpolation_type (str): The type of interpolation to use. Options:
+        'cubic' -- TBI: 'linear', 'nearest', 'zero', 'slinear', 'quadratic'
 
     Returns:
         pandas.DataFrame: The interpolated samples.
@@ -95,7 +96,7 @@ def interpolate_data(
     ]
     r_new = []
 
-    for i, k in enumerate(r):
+    for _, k in enumerate(r):
         k = k[0]
         # print(k)
         le = len(k)
