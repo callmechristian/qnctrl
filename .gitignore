@@ -1,3 +1,6 @@
+# VS code
+.vscode/
+
 # Python
 *.pyc
 __pycache__/
@@ -9,6 +12,7 @@ build/
 environment/__pycache__/
 environment/core/__pycache__/
 environment/models/__pycache__/
+.mypy_cache/
 
 # Custom
 temp
