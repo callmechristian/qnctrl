@@ -51,8 +51,8 @@ This project is based on my thesis at KTH, available at [link TBD](/). Do check 
 
 1. Clone the repository:
     ```sh
-    git clone https://github.com/yourusername/yourproject.git
-    cd yourproject
+    https://github.com/callmechristian/qnctrl.git
+    cd qnctrl
     ```
 
 2. Create a virtual environment and activate it:
