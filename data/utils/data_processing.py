@@ -1,4 +1,17 @@
-import pandas as pd
+"""
+This module provides functions to load, process, and interpolate historical weather data.
+
+Functions:
+- load_historical_weather_data(path: str, interpolate: bool,
+interpolation_values: int) -> pd.DataFrame: Loads historical weather data from
+a CSV file.
+- select_samples(data: pd.DataFrame, n: int, k: int) -> pd.DataFrame: Selects n
+samples starting from index k.
+- interpolate_data(data: pd.DataFrame, interpolation_values: int,
+interpolation_type: str) -> pd.DataFrame: Interpolates the input dataframe.
+"""
+
+import pandas as pd  # type: ignore
 import numpy as np
 from scipy.interpolate import interp1d  # type: ignore
 
@@ -9,12 +22,15 @@ def load_historical_weather_data(
     interpolation_values: int = 30,
 ):
     """
-    Load historical weather data from a CSV file. Default file: data/open-meteo-wind-temp-rain.csv which is temperature, wind speed, rain, and wind direction data from Nice, France.
+    Load historical weather data from a CSV file. Default file:
+    data/open-meteo-wind-temp-rain.csv which is temperature, wind speed, rain,
+    and wind direction data from Nice, France.
 
     Args:
         path (str): The path to the CSV file.
         interpolate (bool): Interpolate the data. Default: False.
-        interpolation_values (int): The number of values to interpolate between each original value. Default: 30.
+        interpolation_values (int): The number of values to interpolate between
+        each original value. Default: 30.
     Returns:
         pandas.DataFrame: The loaded weather data.
     """
@@ -64,7 +80,8 @@ def interpolate_data(
 
     Args:
         data (pandas.DataFrame): The weather data.
-        interpolation_values (int): The number of values to interpolate between each original value.
+        interpolation_values (int): The number of values to interpolate between
+        each original value.
         interpolation_type (str): The type of interpolation to use. Options: 'cubic' -- TBI: 'linear', 'nearest', 'zero', 'slinear', 'quadratic'
 
     Returns:
@@ -81,13 +98,13 @@ def interpolate_data(
     for i, k in enumerate(r):
         k = k[0]
         # print(k)
-        l = len(k)
+        le = len(k)
 
         # Original x values
-        x = np.arange(l)
+        x = np.arange(le)
 
         # New x values with 30 points between each original value
-        x_new = np.linspace(0, l - 1, (l - 1) * interpolation_values + 1)
+        x_new = np.linspace(0, le - 1, (le - 1) * interpolation_values + 1)
 
         # Create cubic interpolation function
         cubic_interp = interp1d(x, k, kind=interpolation_type)
