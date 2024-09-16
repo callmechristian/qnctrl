@@ -1,51 +1,16 @@
 # Quantum Network Control
 
-
-
 This project is based on my thesis at KTH, available at [link TBD](/). Do check it out to better understand what's going on here.
 
 ## Table of Contents
 
-- [Project Title](#project-title)
+- [Quantum Network Control](#quantum-network-control)
 - [Table of Contents](#table-of-contents)
+- [Installation](#installation)
+- [Usage](#usage)
 - [Project Structure](#project-structure)
-- Installation
-- Usage
-- Notebooks
-- Contributing
-- License
-
-## Project Structure
-
-```
-.
-├── .github/
-│   └── workflows/
-│       └── pylint.yml
-├── .gitignore
-├── ANALYSIS_weatherdata.ipynb
-├── animation/
-├── compiled_data.csv
-├── CTRL_DDPG_simple.ipynb
-├── CTRL_DNN.ipynb
-├── CTRL_FFT_DNN.ipynb
-├── CTRL_Inverse.ipynb
-├── CTRL_RL_DDPG_sin_sigspace.ipynb
-├── CTRL_RL_DDPG_sin.ipynb
-├── CTRL_RL_DDPG.ipynb
-├── CTRL_RL_DQN.ipynb
-├── CTRL_RL_PPO_continous.ipynb
-├── CTRL_RL_REINFORCE.ipynb
-├── data/
-├── environment/
-├── output/
-├── PREDICTION_RNN_each_angle.ipynb
-├── PREDICTION_RNN.ipynb
-├── PREDICTION_SARIMA.ipynb
-├── preview_output.ipynb
-├── SAMPLE_noise.ipynb
-└── __init__.py
-```
+- [Contributing](#contributing)
+- [License](#license)
 
 ## Installation
 
@@ -83,7 +48,14 @@ The simulator comes pre-equipped with a few modules. You can find all of them in
 - random_motion: noise models
 - weather: weather noise models
 
-## Notebooks
+## Project Structure
+
+- **Data Folders**
+  - `data\`
+  - `output\`
+
+- **Modules Folder**
+  - `environment\`
 
 - **Control Notebooks**:
   - `CTRL_DDPG_simple.ipynb`
@@ -115,7 +87,8 @@ The simulator comes pre-equipped with a few modules. You can find all of them in
 1. Fork the repository.
 2. Create a new branch (`git checkout -b feature-branch`).
 3. Commit your changes (`git commit -am 'Add new feature'`).
-4. LINT AND COMMENT YOUR CHANGES
+> [!CAUTION]
+> Lint and comment your changes.
 4. Push to the branch (`git push origin feature-branch`).
 5. Create a new Pull Request.
 
