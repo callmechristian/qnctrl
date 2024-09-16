@@ -42,11 +42,11 @@ This project is based on my thesis at KTH, available at [link TBD](/). Do check 
 ### Modules
 
 The simulator comes pre-equipped with a few modules. You can find all of them in `environment\`.
-- core: core simulator modules e.g. entangler, measurement, polarisation controller architectures
-- control: additional control method redefinitions
-- models: pre-defined models with. name indicates specificity. `sinusoidal_control_fixed.py` recommended as a baseline
-- random_motion: noise models
-- weather: weather noise models
+- `core`: core simulator modules e.g. entangler, measurement, polarisation controller architectures
+- `control`: additional control method redefinitions
+- `models`: pre-defined models with. name indicates specificity. `sinusoidal_control_fixed.py` recommended as a baseline
+- `random_motion`: noise models
+- `weather`: weather noise models
 
 ## Project Structure
 
