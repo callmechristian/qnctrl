@@ -13,7 +13,8 @@ This project is based on my thesis at KTH, available at [link TBD](/). Do check 
 - [License](#license)
 
 ## Installation
-
+> [!INFO]
+> Ubuntu 20.04 LTS recommended
 1. Clone the repository:
     ```sh
     https://github.com/callmechristian/qnctrl.git
