@@ -49,6 +49,8 @@ The simulator comes pre-equipped with a few modules. You can find all of them in
 - `random_motion`: noise models
 - `weather`: weather noise models
 
+To create a custom environment model start from any of the templates in `models\`.
+
 ## Project Structure
 
 - **Data Folders**
