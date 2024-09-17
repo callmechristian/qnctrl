@@ -143,7 +143,7 @@ class SimpleControlledEnv:
 
         self.done = False
 
-        self.qber_history: List[float] = []
+        self.qber_history: List[List[float]] = []
         self.phi_history: List[np.array] = [] # type: ignore
 
     def step(
@@ -209,8 +209,8 @@ class SimpleControlledEnv:
             # append the angles for plotting
             self.phi_history.append(phi_move)
             # compute the QBERs
-            qbers_current = compute_noisy_qber(entangled_state_propagation)
-            self.qber_history.append(qbers_current)
+            qbers_current = compute_noisy_qber(entangled_state_propagation) # type: ignore
+            self.qber_history.append(qbers_current) # type: ignore
 
             # if we exceed max t
             if self.t >= self.max_t:

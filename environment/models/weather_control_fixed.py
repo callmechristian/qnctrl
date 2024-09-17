@@ -177,7 +177,7 @@ class WeatherControlledFixedEnv:
         self.ctrl_bob_current = np.zeros(4)
         self.ctrl_pump_current = np.zeros(4)
 
-        self.qber_history: List[float] = []
+        self.qber_history: List[List[float]] = []
         """
         The QBER history.
         
@@ -293,7 +293,7 @@ class WeatherControlledFixedEnv:
             # append the angles for plotting
             # self.phi_history.append(phi_move)
             # compute the QBERs
-            qbers_current = compute_qber(entangled_state_propag)
+            qbers_current = compute_qber(entangled_state_propag) # type: ignore
             self.qbers_current = qbers_current
             self.qber_history.append(qbers_current)
 

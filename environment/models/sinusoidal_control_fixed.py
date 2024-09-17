@@ -170,7 +170,7 @@ class SinusoidalControlledFixedEnv:
         self.ctrl_bob_current = [np.zeros(4) for _ in range(sinusoidal_components)]
         self.ctrl_pump_current = [np.zeros(4) for _ in range(sinusoidal_components)]
 
-        self.qber_history: List[float] = []
+        self.qber_history: List[List[float]] = []
         """
         The QBER history.
         
@@ -307,7 +307,7 @@ class SinusoidalControlledFixedEnv:
             # append the angles for plotting
             self.phi_history.append(phi_move)
             # compute the QBERs
-            qbers_current = compute_qber(entangled_state_propag)
+            qbers_current = compute_qber(entangled_state_propag) # type: ignore
             self.qber_history.append(qbers_current)
 
             self.reward_ctr += self.get_reward()

@@ -76,7 +76,7 @@ class PerfectEnv:
         The frequency of the error model: lower values mean less fluctuation.
         """
 
-        self.qber_history: List[float] = []
+        self.qber_history: List[List[float]] = []
         self.phi_history: list = []
         self.t_history: list = []
 
@@ -111,7 +111,7 @@ class PerfectEnv:
             # append the angles for plotting
             self.phi_history.append(phi_move)
             # compute the QBERs
-            self.qber_history.append(compute_qber(entangled_state_propagation))
+            self.qber_history.append(compute_qber(entangled_state_propagation)) # type: ignore
             # append time for plotting
             self.t_history.append(t)
 

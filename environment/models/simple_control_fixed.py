@@ -312,7 +312,7 @@ class SimpleControlledFixedEnv:
             # append the angles for plotting
             self.phi_history.append(phi_move)
             # compute the QBERs
-            qbers_current = compute_qber(entangled_state_propag)
+            qbers_current = compute_qber(entangled_state_propag) # type: ignore
             self.qber_history.append(qbers_current)
 
             reward = 0

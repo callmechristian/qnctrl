@@ -102,7 +102,7 @@ class SimpleEnv:
             # append the angles for plotting
             self.phi_history.append(phi_move)
             # compute the QBERs
-            self.qbers_history.append(compute_qber(entangled_state_propagation))
+            self.qbers_history.append(compute_qber(entangled_state_propagation)) # type: ignore
             # append time for plotting
             self.t_history.append(t)
 
